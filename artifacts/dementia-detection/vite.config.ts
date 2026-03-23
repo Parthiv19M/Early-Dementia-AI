@@ -4,11 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
-const port = Number(process.env.PORT || 5173);
-
-if (Number.isNaN(port) || port <= 0) {
-  throw new Error(`Invalid PORT value: "${process.env.PORT}"`);
-}
+const port = Number(process.env.PORT) || 5173;
 
 const basePath = process.env.BASE_PATH || "/";
 const apiProxyTarget = process.env.API_PROXY_TARGET || "http://localhost:3000";
