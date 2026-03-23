@@ -1,6 +1,7 @@
 # 🧠 AI-Based Early Dementia Detection System
 
 ## 🔗 Live Demo
+
 👉 https://your-vercel-link.vercel.app
 
 **CognoCare** — An intelligent, AI-powered cognitive screening platform for early-stage dementia detection using advanced speech analysis, memory assessment, and behavioral patterns.
@@ -18,15 +19,19 @@ Dementia affects millions worldwide, yet early detection remains challenging. Ou
 ## 📸 Screenshots
 
 ### 🏠 Home Page
+
 ![Home](./assets/home.png)
 
 ### 🧠 Assessment Flow
+
 ![Assessment](./assets/assessment.png)
 
 ### 📊 Results Dashboard
+
 ![Results](./assets/results.png)
 
 ### 🤖 AI Assistant
+
 ![Chatbot](./assets/chatbot.png)
 
 ---
@@ -275,6 +280,7 @@ _Full API docs available in [lib/api-spec/openapi.yaml](lib/api-spec/openapi.yam
 This project is deployed using Vercel.
 
 ### Steps:
+
 1. Import repo into Vercel
 2. Select frontend: artifacts/dementia-detection
 3. Build command: pnpm build
