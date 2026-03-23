@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Early Dementia Detection"
+version = "1.0.0"
+id = "artifacts/dementia-detection"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+localPort = 25314
+name = "web"
+paths = ["/"]
+
+[services.development]
+run = "pnpm --filter @workspace/dementia-detection run dev"
+
+[services.env]
+PORT = "25314"
+BASE_PATH = "/"
+
+[services.production]
+build = ["pnpm", "--filter", "@workspace/dementia-detection", "run", "build"]
+publicDir = "artifacts/dementia-detection/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"

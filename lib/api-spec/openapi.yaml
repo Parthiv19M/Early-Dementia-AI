@@ -1,0 +1,396 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Early Dementia Detection via Speech Analysis API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: analysis
+    description: Speech analysis operations
+  - name: reports
+    description: Report history operations
+  - name: chatbot
+    description: Cognitive health chatbot
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /analysis/transcribe:
+    post:
+      operationId: transcribeAudio
+      tags: [analysis]
+      summary: Transcribe and analyze audio
+      description: Accepts audio file, transcribes it, and performs cognitive analysis
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                audio:
+                  type: string
+                  format: binary
+                language:
+                  type: string
+                  enum: [en, te]
+                  default: en
+                userId:
+                  type: ["string", "null"]
+              required:
+                - audio
+      responses:
+        "200":
+          description: Analysis complete
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalysisResult"
+        "400":
+          description: Bad request
+
+  /analysis/text:
+    post:
+      operationId: analyzeText
+      tags: [analysis]
+      summary: Analyze text for cognitive markers
+      description: Analyze transcribed text for dementia risk markers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalyzeTextBody"
+      responses:
+        "200":
+          description: Analysis complete
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalysisResult"
+        "400":
+          description: Bad request
+
+  /reports:
+    get:
+      operationId: getReports
+      tags: [reports]
+      summary: Get all reports for a user
+      parameters:
+        - name: userId
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of reports
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Report"
+
+    post:
+      operationId: createReport
+      tags: [reports]
+      summary: Save a report
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReportBody"
+      responses:
+        "201":
+          description: Report created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+        "400":
+          description: Bad request
+
+  /reports/{id}:
+    get:
+      operationId: getReport
+      tags: [reports]
+      summary: Get a specific report
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Report found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+        "404":
+          description: Not found
+
+    delete:
+      operationId: deleteReport
+      tags: [reports]
+      summary: Delete a report
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  /chatbot/message:
+    post:
+      operationId: sendChatbotMessage
+      tags: [chatbot]
+      summary: Send message to cognitive health chatbot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatbotMessageBody"
+      responses:
+        "200":
+          description: Chatbot response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatbotResponse"
+        "400":
+          description: Bad request
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    SpeechFeatures:
+      type: object
+      properties:
+        wordCount:
+          type: integer
+        uniqueWordCount:
+          type: integer
+        vocabularyDiversity:
+          type: number
+        avgSentenceLength:
+          type: number
+        pauseCount:
+          type: integer
+        repetitionCount:
+          type: integer
+        repetitionRate:
+          type: number
+        fillerWordCount:
+          type: integer
+        coherenceScore:
+          type: number
+      required:
+        - wordCount
+        - uniqueWordCount
+        - vocabularyDiversity
+        - avgSentenceLength
+        - pauseCount
+        - repetitionCount
+        - repetitionRate
+        - fillerWordCount
+        - coherenceScore
+
+    AnalysisResult:
+      type: object
+      properties:
+        transcript:
+          type: string
+        riskLevel:
+          type: string
+          enum: [Normal, Mild Cognitive Impairment, High Risk]
+        riskScore:
+          type: number
+        confidence:
+          type: number
+        features:
+          $ref: "#/components/schemas/SpeechFeatures"
+        problematicPatterns:
+          type: array
+          items:
+            type: string
+        recommendations:
+          type: array
+          items:
+            type: string
+        language:
+          type: string
+      required:
+        - transcript
+        - riskLevel
+        - riskScore
+        - confidence
+        - features
+        - problematicPatterns
+        - recommendations
+        - language
+
+    AnalyzeTextBody:
+      type: object
+      properties:
+        text:
+          type: string
+        language:
+          type: string
+          enum: [en, te]
+          default: en
+        userId:
+          type: ["string", "null"]
+      required:
+        - text
+
+    Report:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        transcript:
+          type: string
+        riskLevel:
+          type: string
+        riskScore:
+          type: number
+        confidence:
+          type: number
+        features:
+          $ref: "#/components/schemas/SpeechFeatures"
+        problematicPatterns:
+          type: array
+          items:
+            type: string
+        recommendations:
+          type: array
+          items:
+            type: string
+        language:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - transcript
+        - riskLevel
+        - riskScore
+        - confidence
+        - features
+        - problematicPatterns
+        - recommendations
+        - language
+        - createdAt
+
+    CreateReportBody:
+      type: object
+      properties:
+        userId:
+          type: string
+        transcript:
+          type: string
+        riskLevel:
+          type: string
+        riskScore:
+          type: number
+        confidence:
+          type: number
+        features:
+          $ref: "#/components/schemas/SpeechFeatures"
+        problematicPatterns:
+          type: array
+          items:
+            type: string
+        recommendations:
+          type: array
+          items:
+            type: string
+        language:
+          type: string
+      required:
+        - userId
+        - transcript
+        - riskLevel
+        - riskScore
+        - confidence
+        - features
+        - problematicPatterns
+        - recommendations
+        - language
+
+    ChatMessage:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+      required:
+        - role
+        - content
+
+    ChatbotMessageBody:
+      type: object
+      properties:
+        message:
+          type: string
+        history:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatMessage"
+        language:
+          type: string
+          enum: [en, te]
+          default: en
+      required:
+        - message
+
+    ChatbotResponse:
+      type: object
+      properties:
+        reply:
+          type: string
+        tips:
+          type: array
+          items:
+            type: string
+      required:
+        - reply
+        - tips

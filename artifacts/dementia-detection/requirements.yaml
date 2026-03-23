@@ -1,0 +1,17 @@
+packages:
+  "framer-motion": "For smooth page transitions and interactive animations"
+  "recharts": "For the cognitive trend charts in History and Doctor Dashboard"
+  "date-fns": "For formatting report dates"
+  "lucide-react": "For beautiful consistent iconography"
+
+images:
+  - path: "artifacts/dementia-detection/public/images/hero-bg.png"
+    description: "Abstract elegant neural network glowing with soft calming medical blue and teal light, clean modern clinical background, highly detailed"
+    aspect_ratio: "16:9"
+  - path: "artifacts/dementia-detection/public/images/chatbot-avatar.png"
+    description: "Friendly futuristic clinical AI assistant robot avatar face, glowing soft blue, clean modern medical style, isolated on a white background"
+    aspect_ratio: "1:1"
+
+notes:
+  - Expects @workspace/api-client-react generated hooks to be available
+  - API operations map to standard REST calls via generated React Query mutations
