@@ -1,5 +1,8 @@
 # 🧠 AI-Based Early Dementia Detection System
 
+## 🔗 Live Demo
+👉 https://your-vercel-link.vercel.app
+
 **CognoCare** — An intelligent, AI-powered cognitive screening platform for early-stage dementia detection using advanced speech analysis, memory assessment, and behavioral patterns.
 
 ---
@@ -9,6 +12,22 @@
 Dementia affects millions worldwide, yet early detection remains challenging. Our system provides a **fast, accessible, and scientifically grounded screening tool** that can be deployed in healthcare settings, community centers, and educational institutions.
 
 **Key insight**: Early intervention can slow cognitive decline by 30-40%. Our platform makes screening immediate and non-invasive.
+
+---
+
+## 📸 Screenshots
+
+### 🏠 Home Page
+![Home](./assets/home.png)
+
+### 🧠 Assessment Flow
+![Assessment](./assets/assessment.png)
+
+### 📊 Results Dashboard
+![Results](./assets/results.png)
+
+### 🤖 AI Assistant
+![Chatbot](./assets/chatbot.png)
 
 ---
 
@@ -168,7 +187,7 @@ Memory Test Scoring
    ↓
 Behavioral Pattern Analysis
    ↓
-ML-Based Risk Calculation
+AI-assisted heuristic scoring (extendable to ML models)
    ↓
 Report Generation
    ↓
@@ -234,9 +253,43 @@ _Full API docs available in [lib/api-spec/openapi.yaml](lib/api-spec/openapi.yam
 ## 📈 Performance Metrics
 
 - **Assessment Time**: 3–5 minutes
-- **Accuracy**: 85%+ (compared to clinical standards)
+- **Prototype Accuracy**: Experimental / under validation
 - **False Positive Rate**: <10%
 - **Accessibility**: WCAG 2.1 AA compliant
+
+---
+
+## 🏆 Why This Project Stands Out
+
+- Real-world healthcare problem with high impact
+- Fast (<5 min) cognitive screening
+- Works without expensive hardware
+- Multilingual (India-ready solution 🇮🇳)
+- Scalable to mobile and rural environments
+- Designed for clinical integration
+
+---
+
+## 🚀 Deployment
+
+This project is deployed using Vercel.
+
+### Steps:
+1. Import repo into Vercel
+2. Select frontend: artifacts/dementia-detection
+3. Build command: pnpm build
+4. Output directory: dist
+
+---
+
+## 🎤 Demo Flow (For Presentation)
+
+1. Enter patient details
+2. Perform memory + speech test
+3. View cognitive score
+4. Explain risk level
+5. Show progress tracking
+6. Use AI assistant for recommendations
 
 ---
 
@@ -286,7 +339,6 @@ This project is licensed under the MIT License — see [LICENSE](LICENSE) file f
 ## 🙋 Support & Contact
 
 - **Issues**: [GitHub Issues](https://github.com/Parthiv19M/Early-Dementia-AI/issues)
-- **Email**: parthiv.dev@example.com
 - **Documentation**: [Wiki](https://github.com/Parthiv19M/Early-Dementia-AI/wiki)
 
 ---

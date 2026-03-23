@@ -1,0 +1,6 @@
+{
+  "framework": "vite",
+  "buildCommand": "pnpm build",
+  "outputDirectory": "artifacts/dementia-detection/dist",
+  "installCommand": "pnpm install"
+}
