@@ -1,387 +1,276 @@
-# 🧠 AI-Based Early Dementia Detection System
+# 🧠 CognoCare — AI-Based Early Dementia Detection System
+
+> AI-powered cognitive screening platform using speech, memory, and behavioral analysis for early dementia risk assessment.
+
+![Status](https://img.shields.io/badge/Status-Live-success)
+![Stack](https://img.shields.io/badge/Stack-React%20%7C%20AI-blue)
+
+---
 
 ## 🔗 Live Demo
 
-👉 https://your-vercel-link.vercel.app
-
-**CognoCare** — An intelligent, AI-powered cognitive screening platform for early-stage dementia detection using advanced speech analysis, memory assessment, and behavioral patterns.
+👉 https://early-dementia-ai-detection-hcscxofou.vercel.app/
 
 ---
 
 ## 🎯 Overview
 
-Dementia affects millions worldwide, yet early detection remains challenging. Our system provides a **fast, accessible, and scientifically grounded screening tool** that can be deployed in healthcare settings, community centers, and educational institutions.
+Dementia affects millions globally, yet early detection remains delayed and inaccessible.
 
-**Key insight**: Early intervention can slow cognitive decline by 30-40%. Our platform makes screening immediate and non-invasive.
+**CognoCare** provides a fast, non-invasive, and AI-assisted cognitive screening tool that evaluates early signs through speech patterns, memory recall, and behavioral responses.
+
+> ⚡ Early detection can slow progression by up to 40% — this platform makes screening accessible in under 5 minutes.
+
+---
+
+## 🏆 Why This Project Stands Out
+
+- 🧠 Real-world healthcare problem (high impact)
+- ⚡ Sub-5 minute cognitive screening
+- 🤖 AI-assisted scoring engine
+- 🌍 Multilingual (India-ready 🇮🇳)
+- 📱 Mobile-friendly & scalable
+- 🔒 Privacy-first design (local-first architecture)
+- 🚀 Production-ready deployment (Vercel)
 
 ---
 
 ## 📸 Screenshots
 
 ### 🏠 Home Page
-
 ![Home](./assets/home.png)
 
 ### 🧠 Assessment Flow
-
 ![Assessment](./assets/assessment.png)
 
 ### 📊 Results Dashboard
-
 ![Results](./assets/results.png)
 
 ### 🤖 AI Assistant
-
 ![Chatbot](./assets/chatbot.png)
 
 ---
 
-## 🌟 Problem Statement
+## 🌍 Problem Statement
 
-- 🔴 **60 million+ people** live with dementia globally
-- ⏰ **Average delay**: 2-3 years between symptom onset and diagnosis
-- 💰 **High cost**: Traditional cognitive assessments require expert neurologists
-- 🌍 **Limited access**: Rural/remote areas lack specialist availability
+- 🔴 60M+ people affected globally
+- ⏰ Diagnosis delay: 2–3 years
+- 💰 High dependency on specialists
+- 🌍 Limited rural accessibility
 
 ---
 
-## 💡 Our Solution
+## 💡 Solution
 
-CognoCare delivers a **multi-modal cognitive assessment** combining:
+CognoCare delivers a **multi-modal cognitive assessment system**:
 
-### 🧩 Assessment Modules
+### 🧩 Modules
 
-1. **Speech Analysis**
-   - Linguistic complexity scoring
-   - Pause/hesitation detection
-   - Vocabulary richness assessment
-2. **Memory Tests**
-   - 3-word recall challenge
-   - Temporal sequencing
-   - Pattern recognition
+**Speech Analysis**
+- Linguistic complexity
+- Hesitation detection
+- Vocabulary richness
 
-3. **Behavioral Patterns**
-   - Response latency
-   - Error correction behavior
-   - Consistency metrics
+**Memory Testing**
+- 3-word recall
+- Pattern recognition
+- Temporal sequencing
 
-### 📊 Smart Risk Analysis
+**Behavioral Signals**
+- Response latency
+- Error correction
+- Consistency tracking
 
-- **Cognitive Score**: 0–100 scale
-- **Risk Stratification**: Low / Medium / High
-- **Confidence Metrics**: Model certainty levels
-- **Trend Analysis**: Progress comparison over time
+---
+
+## 📊 Cognitive Scoring System
+
+- Score Range: **0–100**
+- Risk Levels:
+  - 🔴 High (0–40)
+  - 🟡 Medium (40–70)
+  - 🟢 Low (70–100)
+
+### Scoring Logic
+
+- Baseline: 50
+- Negative factors: hesitation, memory failure
+- Positive factors: clarity, recall speed
 
 ---
 
 ## ✨ Key Features
 
-| Feature                  | Description                                        |
-| ------------------------ | -------------------------------------------------- |
-| 🚀 **Instant Screening** | Real-time cognitive assessment in <5 minutes       |
-| 🌐 **Multilingual**      | English & Hindi language support                   |
-| 💾 **Patient Records**   | Auto-generated Patient ID with history tracking    |
-| 📈 **Progress Tracking** | Compare assessments over time                      |
-| 🤖 **AI Assistant**      | Personalized health guidance with typing animation |
-| 📱 **Mobile-Friendly**   | Responsive design for all devices                  |
-| 🔒 **Privacy-First**     | Local storage mode (HIPAA-ready architecture)      |
-| 📊 **Doctor Dashboard**  | Professional reporting interface                   |
+| Feature | Description |
+|--------|------------|
+| 🚀 Instant Screening | <5 min assessment |
+| 🌐 Multilingual | English + Hindi |
+| 📊 Progress Tracking | Historical comparison |
+| 🤖 AI Assistant | Personalized guidance |
+| 📱 Responsive UI | Mobile optimized |
+| 🔒 Privacy-first | Local storage support |
+| 🏥 Doctor Dashboard | Clinical insights |
 
 ---
 
-## 🛠️ Tech Stack
+## ⚙️ Tech Stack
 
 ### Frontend
-
-- **Framework**: React 18 with TypeScript
-- **Build Tool**: Vite
-- **Styling**: Tailwind CSS
-- **Components**: Radix UI + shadcn/ui
-- **Animations**: Framer Motion
-- **State Management**: React Query + Zustand
-- **Forms**: React Hook Form + Zod
+- React 18 + TypeScript
+- Vite
+- Tailwind CSS
+- shadcn/ui + Radix UI
+- Framer Motion
 
 ### Backend
+- Node.js + Express
+- PostgreSQL
+- Drizzle ORM
 
-- **Runtime**: Node.js
-- **Framework**: Express.js
-- **Database**: PostgreSQL (production-ready)
-- **Storage**: Drizzle ORM
-
-### AI/ML
-
-- **Speech Processing**: Web Audio API + Analysis algorithms
-- **Scoring Engine**: Rule-based cognitive analysis (extensible for ML models)
-- **Integration-Ready**: OpenAI API compatibility
+### AI Layer
+- Web Audio API
+- Heuristic scoring engine
+- OpenAI-ready integration
 
 ### DevOps
+- pnpm monorepo
+- Vercel deployment
 
-- **Workspace**: pnpm monorepo
-- **Deployment**: Vercel/Replit ready
-- **Testing**: TypeScript strict mode
+---
+
+## 🧠 How It Works
+
+```
+User Input
+    ↓
+Speech + Text Analysis
+    ↓
+Memory Evaluation
+    ↓
+Behavioral Metrics
+    ↓
+AI-assisted Risk Scoring
+    ↓
+Report Generation
+```
 
 ---
 
 ## 📦 Project Structure
 
 ```
-.
-├── artifacts/               # Production apps
-│   ├── api-server/         # Express backend API
-│   ├── dementia-detection/ # React frontend app
-│   └── mockup-sandbox/     # UI component showcase
-│
-├── lib/                    # Shared libraries
-│   ├── api-client-react/   # Typed API client
-│   ├── api-spec/           # OpenAPI specification
-│   ├── api-zod/            # Zod type definitions
-│   ├── db/                 # Database layer
-│   └── integrations-*      # AI integrations
-│
-├── scripts/                # Build & utility scripts
-├── package.json            # Root workspace config
-└── README.md               # This file
+artifacts/
+├── dementia-detection/   # Frontend
+├── api-server/           # Backend
+└── mockup-sandbox/       # UI experiments
+
+lib/
+├── db/
+├── api-spec/
+└── integrations/
 ```
 
 ---
 
 ## 🚀 Quick Start
 
-### Prerequisites
-
-- Node.js 18+
-- pnpm 9+
-
-### Installation
-
 ```bash
-# Clone the repository
 git clone https://github.com/Parthiv19M/Early-Dementia-AI.git
 cd Early-Dementia-AI
-
-# Install dependencies
 pnpm install
 
-# Start development server
 cd artifacts/dementia-detection
-PORT=5173 BASE_PATH="/" pnpm dev
-
-# Open browser to:
-# http://localhost:5173
-```
-
-### Build for Production
-
-```bash
-cd artifacts/dementia-detection
-PORT=5173 BASE_PATH="/" pnpm build
+pnpm dev
 ```
 
 ---
 
-## 📊 How It Works
+## 🌐 Deployment
 
-### Assessment Flow
+Deployed on Vercel:
 
-```
-User Input
-   ↓
-Speech/Text Analysis
-   ↓
-Memory Test Scoring
-   ↓
-Behavioral Pattern Analysis
-   ↓
-AI-assisted heuristic scoring (extendable to ML models)
-   ↓
-Report Generation
-   ↓
-Healthcare Professional Review
-```
-
-### Scoring Algorithm
-
-- **Baseline**: 50 (neutral)
-- **Risk Factors** (reduce score):
-  - Speech hesitation patterns (-5 to -15)
-  - Memory test failures (-10 to -25)
-  - Slow response time (-5 to -10)
-- **Protective Factors** (increase score):
-  - High vocabulary usage (+5)
-  - Rapid recall (+10)
-  - Clear speech patterns (+5)
-
-**Range Interpretation**:
-
-- **0–40**: High Risk 🔴
-- **40–70**: Medium Risk 🟡
-- **70–100**: Low Risk 🟢
+* Root: `artifacts/dementia-detection`
+* Build: `pnpm build`
+* Output: `dist`
 
 ---
 
-## 🔧 API Documentation
+## 🎤 Demo Flow
 
-### Health Check
+1. Enter patient details
+2. Perform memory & speech test
+3. Generate cognitive score
+4. Interpret risk level
+5. View progress insights
 
-```bash
-GET /api/health
-```
+---
 
-### Analyze Text
+## 📊 Performance
+
+* ⏱️ Time: 3–5 min
+* 🧪 Accuracy: Experimental (prototype stage)
+* 📉 False Positives: <10%
+* ♿ Accessibility: WCAG 2.1
+
+---
+
+## 🔧 API (Simplified)
 
 ```bash
 POST /api/analyze
-Content-Type: application/json
-
-{
-  "text": "...",
-  "language": "en"
-}
-```
-
-### Generate Report
-
-```bash
 POST /api/reports
-Content-Type: application/json
-
-{
-  "patientId": "...",
-  "assessmentData": {...}
-}
+GET  /api/health
 ```
 
-_Full API docs available in [lib/api-spec/openapi.yaml](lib/api-spec/openapi.yaml)_
-
 ---
 
-## 📈 Performance Metrics
+## 🗺️ Roadmap
 
-- **Assessment Time**: 3–5 minutes
-- **Prototype Accuracy**: Experimental / under validation
-- **False Positive Rate**: <10%
-- **Accessibility**: WCAG 2.1 AA compliant
-
----
-
-## 🏆 Why This Project Stands Out
-
-- Real-world healthcare problem with high impact
-- Fast (<5 min) cognitive screening
-- Works without expensive hardware
-- Multilingual (India-ready solution 🇮🇳)
-- Scalable to mobile and rural environments
-- Designed for clinical integration
-
----
-
-## 🚀 Deployment
-
-This project is deployed using Vercel.
-
-### Steps:
-
-1. Import repo into Vercel
-2. Select frontend: artifacts/dementia-detection
-3. Build command: pnpm build
-4. Output directory: dist
-
----
-
-## 🎤 Demo Flow (For Presentation)
-
-1. Enter patient details
-2. Perform memory + speech test
-3. View cognitive score
-4. Explain risk level
-5. Show progress tracking
-6. Use AI assistant for recommendations
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Development Guidelines
-
-- Follow TypeScript strict mode
-- Write tests for new features
-- Update documentation
-- Format with Prettier
-
----
-
-## ⚠️ Medical Disclaimer
-
-**Important**: This tool is designed for **screening purposes only** and is **NOT a substitute for professional medical diagnosis**.
-
-- Results should be reviewed by qualified healthcare professionals
-- This system does not diagnose dementia
-- Always consult a neurologist or geriatrician for clinical evaluation
-- Use in clinical settings requires proper institutional review and compliance
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License — see [LICENSE](LICENSE) file for details.
-
----
-
-## 👥 Authors
-
-- **Parthiv Meduri** — Full Stack Development
-- **Saketh KL** — AI/ML Integration
-
----
-
-## 🙋 Support & Contact
-
-- **Issues**: [GitHub Issues](https://github.com/Parthiv19M/Early-Dementia-AI/issues)
-- **Documentation**: [Wiki](https://github.com/Parthiv19M/Early-Dementia-AI/wiki)
-
----
-
-## 🎯 Roadmap
-
-- [ ] Integration with OpenAI's advanced speech models
-- [ ] Real-time voice biomarker analysis
-- [ ] Cloud synchronization & multi-device support
-- [ ] Mobile app (iOS/Android) using React Native
-- [ ] Clinical validation study (Phase II trial)
-- [ ] Integration with EHR systems (HL7/FHIR)
-- [ ] Multilingual expansion (Spanish, Mandarin, etc.)
+* 🎤 Voice biomarker analysis
+* 📱 Mobile app
+* ☁️ Cloud sync
+* 🏥 EHR integration
+* 🌍 More languages
 
 ---
 
 ## 🌍 Impact & Vision
 
-CognoCare aims to democratize cognitive health screening globally. By making early dementia detection accessible and affordable, we can:
+Making cognitive screening:
 
-✅ Enable early intervention  
-✅ Improve quality of life  
-✅ Reduce healthcare costs  
-✅ Support underserved communities
+✅ Affordable
+✅ Accessible
+✅ Scalable
 
-**Together, we're building a future where cognitive health is accessible to everyone, everywhere.**
-
----
-
-## 📚 References
-
-- Petersen, R. C. (2004). "Mild cognitive impairment as a clinical entity and treatment target" _Arch Neurol_.
-- Dubois, B., et al. (2016). "Research criteria for the diagnosis of Alzheimer's disease" _Lancet Neurol_.
-- WHO Guidelines on dementia risk reduction (2023)
+> Goal: Early detection for everyone, everywhere.
 
 ---
 
-⭐ **If you find this project helpful, please star it on GitHub!**
+## 🤝 Contributing
 
-Built with ❤️ by the CognoCare team
+PRs welcome. Follow standard Git workflow.
+
+---
+
+## ⚠️ Disclaimer
+
+Not a medical diagnosis tool. For screening only.
+
+---
+
+## 👥 Authors
+
+* **Parthiv Meduri** — Full Stack
+  [github.com/Parthiv19M](https://github.com/Parthiv19M)
+* **Saketh KL** — AI/ML
+  [github.com/klsaketh7-psl](https://github.com/klsaketh7-psl)
+
+---
+
+## 📄 License
+
+MIT License
+
+---
+
+⭐ **Star this repo if you find it useful!**
