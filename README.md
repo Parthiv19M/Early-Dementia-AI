@@ -9,7 +9,7 @@
 
 ## 🔗 Live Demo
 
-👉 https://early-dementia-ai-detection-hcscxofou.vercel.app/
+👉 https://early-dementia-ai-detection.vercel.app/
 
 ---
 
