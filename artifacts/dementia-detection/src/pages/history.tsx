@@ -33,7 +33,7 @@ export default function History() {
       observationLabel: 'Observation:',
       noObservations: 'No major speech warning signs were recorded.',
       deleteConfirm: 'Delete this saved assessment?',
-      demoNote: 'Demo note: assessment history is saved locally on this device so the hackathon demo works even without a database connection.'
+      demoNote: 'Demo mode: Assessment history is stored locally for quick testing. Backend integration is planned for production.'
     },
     hi: {
       title: 'रोगी का इतिहास',
