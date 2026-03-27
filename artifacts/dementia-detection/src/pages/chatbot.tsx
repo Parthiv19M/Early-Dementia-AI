@@ -210,14 +210,16 @@ export default function Chatbot() {
               placeholder={t.placeholder}
               className="pr-14 rounded-full shadow-inner bg-secondary/50 focus:bg-white transition-all duration-300"
             />
-            <button
+            <Button
               type="submit"
+              variant="primary"
+              size="icon"
               disabled={!input.trim() || isTyping}
               aria-label="Send message"
-              className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center transition-shadow duration-150 shadow-md hover:shadow-lg transform transition-transform duration-150 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full !w-10 !h-10 p-0 flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 hover:shadow-lg shadow-primary/20"
             >
-              ➤
-            </button>
+              <Send className="w-5 h-5" />
+            </Button>
           </form>
         </div>
       </Card>
