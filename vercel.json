@@ -2,11 +2,8 @@
   "framework": "vite",
   "buildCommand": "cd artifacts/dementia-detection && pnpm build",
   "outputDirectory": "artifacts/dementia-detection/dist",
-  "rewrites": [
-    {
-      "source": "/(assets|images|favicon.svg|opengraph.jpg)/(.*)",
-      "destination": "/$1/$2"
-    },
-    { "source": "/(.*)", "destination": "/index.html" }
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
