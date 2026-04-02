@@ -60,6 +60,25 @@ export default function Home() {
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
+    const sampleStr = sessionStorage.getItem('cogno_sample');
+    if (sampleStr) {
+      try {
+        const sample = JSON.parse(sampleStr);
+        setTextInput(sample.text);
+        setRecallInput(sample.recalled);
+        setMode('text');
+        setStep('record');
+        if (sample.recalled.includes(',')) {
+          setChallengeWords(['Drum', 'Trumpet', 'Silver']);
+        }
+        sessionStorage.removeItem('cogno_sample');
+      } catch (e) {
+        console.error('Failed to parse sample data', e);
+      }
+    }
+  }, [setChallengeWords]);
+
+  useEffect(() => {
     if (step === 'memorize') {
       setCountdown(10);
       countdownRef.current = setInterval(() => {

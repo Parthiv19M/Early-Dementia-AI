@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'wouter';
-import { Activity, Brain, History, LayoutDashboard, MessageSquare } from 'lucide-react';
+import { Activity, Brain, History, LayoutDashboard, MessageSquare, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -8,6 +8,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   const navItems = [
     { path: '/', icon: Activity, label: 'Analysis' },
+    { path: '/learn', icon: Info, label: 'Learn' },
     { path: '/history', icon: History, label: 'History' },
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/chatbot', icon: MessageSquare, label: 'AI Assistant' },

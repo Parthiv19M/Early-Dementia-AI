@@ -8,6 +8,7 @@ const Results = lazy(() => import("@/pages/results"));
 const History = lazy(() => import("@/pages/history"));
 const DoctorDashboard = lazy(() => import("@/pages/doctor-dashboard"));
 const Chatbot = lazy(() => import("@/pages/chatbot"));
+const Learn = lazy(() => import("@/pages/learn"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
 import { AppProvider } from "@/lib/store";
@@ -80,6 +81,7 @@ function Router() {
           <Route path="/history" component={History} />
           <Route path="/dashboard" component={DoctorDashboard} />
           <Route path="/chatbot" component={Chatbot} />
+          <Route path="/learn" component={Learn} />
           <Route component={NotFound} />
         </Switch>
       </Suspense>
