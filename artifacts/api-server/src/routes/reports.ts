@@ -4,6 +4,16 @@ import { db, reportsTable } from "@workspace/db";
 
 const router: IRouter = Router();
 
+router.use((req, res, next) => {
+  if (!process.env.DATABASE_URL) {
+    res.status(503).json({
+      error: "Assessment storage is unavailable. Please ensure DATABASE_URL is set."
+    });
+    return;
+  }
+  next();
+});
+
 router.get("/reports", async (req, res): Promise<void> => {
   const userId = req.query.userId as string | undefined;
 
