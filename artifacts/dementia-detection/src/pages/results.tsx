@@ -75,13 +75,13 @@ export default function Results() {
       wordsRecalled: 'शब्द याद आए',
       averageOfBoth: 'दोनों का औसत',
       scoreExplanation: 'स्कोर का स्पष्टीकरण',
-      recallDetails: 'स्मृति विवरण',
+      recallDetails: 'स्मृति रिकॉल विवरण',
       recalled: 'याद आया',
       missed: 'छूट गया',
       insightSummary: 'अंतर्दृष्टि सारांश',
       noObservations: 'कोई विशिष्ट अवलोकन दर्ज नहीं किया गया।',
       recommendations: 'सिफ़ारिशें',
-      disclaimerTitle: 'महत्वपूर्ण सूचना',
+      disclaimerTitle: 'महत्वपूर्ण अस्वीकरण',
       confidenceScore: 'विश्वास स्कोर:',
       disclaimerText: '⚠️ यह एक एआई-आधारित प्रारंभिक जांच उपकरण है और चिकित्सा निदान नहीं है। औपचारिक मूल्यांकन और चिकित्सा सलाह के लिए हमेशा डॉक्टर से परामर्श लें।'
     }

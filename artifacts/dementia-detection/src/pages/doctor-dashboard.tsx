@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Users, Activity, Brain, Clock, Search, TrendingUp, Calendar, LineChart as ChartIcon } from 'lucide-react';
+import { Users, Activity, Brain, Clock, Search, TrendingUp, Calendar, LineChart as ChartIcon, ShieldAlert } from 'lucide-react';
 import { Card, Input, Button, ScoreGauge, Badge } from '@/components/ui';
 import { getStoredAssessments, getAssessmentsByPatientId, type AssessmentRecord } from '@/lib/assessment-storage';
 import { useAppStore } from '@/lib/store';
@@ -36,26 +36,26 @@ export default function DoctorDashboard() {
       historyTitle: 'Assessment History'
     },
     hi: {
-      title: 'प्रदाता डैशबोर्ड',
-      subtitle: 'सहेजे गए मूल्यांकनों की समीक्षा करें, प्रवृत्तियों की निगरानी करें और रोगी आईडी द्वारा खोजें।',
+      title: 'चिकित्सक डैशबोर्ड',
+      subtitle: 'सहेजे गए मूल्यांकनों की समीक्षा करें, संज्ञानात्मक प्रवृत्तियों की निगरानी करें और रोगी आईडी द्वारा खोजें।',
       searchPlaceholder: 'रोगी आईडी खोजें...',
-      viewPatient: 'रोगी देखें',
-      snapshotTitle: 'समग्र अवलोकन',
+      viewPatient: 'रोगी विवरण',
+      snapshotTitle: 'नैदानिक अवलोकन',
       patientRecord: 'रोगी रिकॉर्ड:',
       assessmentsLabel: 'मूल्यांकन',
-      statsTotal: 'कुल मूल्यांकन',
-      statsTotalHelp: 'इस डिवाइस पर उपलब्ध सहेजे गए मूल्यांकन।',
+      statsTotal: 'कुल जांच',
+      statsTotalHelp: 'इस डिवाइस पर उपलब्ध सहेजे गए स्क्रीनिंग डेटा।',
       statsLatest: 'नवीनतम स्कोर',
-      statsLatestHelp: 'नवीनतम जोखिम:',
-      statsLatestEmpty: 'विवरण देखने के लिए मूल्यांकन चलाएं।',
-      statsTrend: 'जोखिम रुझान',
-      statsTrendHelp: 'शुरुआत से अंत तक परिवर्तन।',
-      emptyState: ' डैशबोर्ड को भरने के लिए रोगी आईडी खोजें या मूल्यांकन पूरा करें।',
-      snapshotCardHeader: 'संज्ञानात्मक स्थिति',
+      statsLatestHelp: 'जोखिम स्तर:',
+      statsLatestEmpty: 'विवरण देखने के लिए स्क्रीनिंग शुरू करें।',
+      statsTrend: 'संज्ञानात्मक रुझान',
+      statsTrendHelp: 'प्रथम और नवीनतम रिकॉर्ड के बीच परिवर्तन।',
+      emptyState: 'डैशबोर्ड को भरने के लिए रोगी आईडी खोजें या मूल्यांकन पूरा करें।',
+      snapshotCardHeader: 'नैदानिक स्थिति',
       averageScore: 'औसत स्कोर',
-      recentTrend: 'हालिया रुझान',
+      recentTrend: 'हालिया संज्ञानात्मक रुझान',
       noObservations: 'कोई बड़ी चेतावनी दर्ज नहीं की गई।',
-      trendGraph: 'संज्ञानात्मक रुझान ग्राफ',
+      trendGraph: 'दीर्घकालिक रुझान ग्राफ',
       historyTitle: 'मूल्यांकन इतिहास'
     }
   };
@@ -259,6 +259,25 @@ export default function DoctorDashboard() {
           </Card>
         </div>
       )}
+
+      <div className="mt-12 pt-8 border-t border-border/60">
+        <div className="bg-secondary/30 rounded-3xl p-8 flex flex-col md:flex-row items-center gap-6 group transition-all hover:bg-secondary/40">
+           <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-500">
+             <ShieldAlert className="w-7 h-7 text-primary" />
+           </div>
+           <div className="text-center md:text-left">
+             <div className="flex flex-col md:flex-row md:items-center gap-3 mb-2">
+                <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">Clinical Notice / चिकित्सा सूचना</span>
+                <Badge variant="outline" className="w-fit mx-auto md:mx-0 text-[10px] font-bold py-0 h-5 bg-white/50 border-primary/20 text-primary uppercase">
+                   Protocol 7B.2
+                </Badge>
+             </div>
+             <p className="text-[13px] text-foreground/70 leading-relaxed font-semibold">
+               This dashboard is intended for screening and longitudinal observation. All AI insights should be clinically verified by a professional physician. Data is currently being stored within this local environment for prototype fidelity.
+             </p>
+           </div>
+        </div>
+      </div>
     </div>
   );
 }
