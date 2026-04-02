@@ -9,7 +9,9 @@
 
 ## 🔗 Live Demo
 
-👉 https://early-dementia-ai-detection.vercel.app/
+- 🌐 Frontend: https://early-dementia-ai-detection.vercel.app/
+- ⚙️ Backend API: https://early-dementia-ai-1.onrender.com
+- ❤️ Health Check: https://early-dementia-ai-1.onrender.com/api/healthz
 
 ---
 
@@ -30,8 +32,8 @@ Dementia affects millions globally, yet early detection remains delayed and inac
 - 🤖 AI-assisted scoring engine
 - 🌍 Multilingual (India-ready 🇮🇳)
 - 📱 Mobile-friendly & scalable
-- 🔒 Privacy-first design (local-first architecture)
-- 🚀 Production-ready deployment (Vercel)
+- 🔒 Privacy-first design
+- 🚀 Full-stack production deployment (Vercel + Render)
 
 ---
 
@@ -108,7 +110,7 @@ CognoCare delivers a **multi-modal cognitive assessment system**:
 | 📊 Progress Tracking | Historical comparison |
 | 🤖 AI Assistant | Personalized guidance |
 | 📱 Responsive UI | Mobile optimized |
-| 🔒 Privacy-first | Local storage support |
+| 🔒 Privacy-first | Secure handling |
 | 🏥 Doctor Dashboard | Clinical insights |
 
 ---
@@ -124,51 +126,51 @@ CognoCare delivers a **multi-modal cognitive assessment system**:
 
 ### Backend
 - Node.js + Express
-- PostgreSQL
+- PostgreSQL (optional / future-ready)
 - Drizzle ORM
 
 ### AI Layer
 - Web Audio API
 - Heuristic scoring engine
-- OpenAI-ready integration
+- OpenAI / Gemini-ready integration
 
 ### DevOps
 - pnpm monorepo
-- Vercel deployment
+- Vercel (Frontend)
+- Render (Backend)
 
 ---
 
 ## 🧠 How It Works
 
-```
 User Input
-    ↓
+↓
 Speech + Text Analysis
-    ↓
+↓
 Memory Evaluation
-    ↓
+↓
 Behavioral Metrics
-    ↓
+↓
 AI-assisted Risk Scoring
-    ↓
+↓
 Report Generation
-```
+
 
 ---
 
 ## 📦 Project Structure
 
-```
+
 artifacts/
-├── dementia-detection/   # Frontend
-├── api-server/           # Backend
-└── mockup-sandbox/       # UI experiments
+├── dementia-detection/ # Frontend (Vercel)
+├── api-server/ # Backend (Render)
+└── mockup-sandbox/ # UI experiments
 
 lib/
 ├── db/
 ├── api-spec/
 └── integrations/
-```
+
 
 ---
 
@@ -179,98 +181,67 @@ git clone https://github.com/Parthiv19M/Early-Dementia-AI.git
 cd Early-Dementia-AI
 pnpm install
 
+# Frontend
 cd artifacts/dementia-detection
+pnpm dev
+
+# Backend
+cd ../api-server
+pnpm install
 pnpm dev
 ```
 
----
+🌐 **Deployment Architecture**
+- Frontend → Vercel
+- Backend → Render
+- Connected via environment variable:
+  `VITE_API_BASE_URL=https://early-dementia-ai-1.onrender.com`
 
-## 🌐 Deployment
-
-Deployed on Vercel:
-
-* Root: `artifacts/dementia-detection`
-* Build: `pnpm build`
-* Output: `dist`
-
----
-
-## 🎤 Demo Flow
-
+🎤 **Demo Flow**
 1. Enter patient details
 2. Perform memory & speech test
 3. Generate cognitive score
 4. Interpret risk level
-5. View progress insights
+5. View insights
 
----
+📊 **Performance**
+- ⏱️ Time: 3–5 min
+- 🧪 Accuracy: Experimental (prototype stage)
+- 📉 False Positives: <10%
+- ♿ Accessibility: WCAG 2.1
 
-## 📊 Performance
+🔧 **API (Core Endpoints)**
+- `POST /api/analyze`
+- `POST /api/reports`
+- `GET  /api/healthz`
 
-* ⏱️ Time: 3–5 min
-* 🧪 Accuracy: Experimental (prototype stage)
-* 📉 False Positives: <10%
-* ♿ Accessibility: WCAG 2.1
+🗺️ **Roadmap**
+- 🎤 Voice biomarker analysis
+- 📱 Mobile app (React Native / Flutter)
+- ☁️ Cloud sync
+- 🏥 EHR integration
+- 🌍 More languages (Telugu, Hindi+)
 
----
-
-## 🔧 API (Simplified)
-
-```bash
-POST /api/analyze
-POST /api/reports
-GET  /api/health
-```
-
----
-
-## 🗺️ Roadmap
-
-* 🎤 Voice biomarker analysis
-* 📱 Mobile app
-* ☁️ Cloud sync
-* 🏥 EHR integration
-* 🌍 More languages
-
----
-
-## 🌍 Impact & Vision
+🌍 **Impact & Vision**
 
 Making cognitive screening:
-
 ✅ Affordable
 ✅ Accessible
 ✅ Scalable
 
-> Goal: Early detection for everyone, everywhere.
+Goal: Early detection for everyone, everywhere.
 
----
-
-## 🤝 Contributing
-
+🤝 **Contributing**
 PRs welcome. Follow standard Git workflow.
 
----
-
-## ⚠️ Disclaimer
-
+⚠️ **Disclaimer**
 Not a medical diagnosis tool. For screening only.
 
----
+👥 **Authors**
+- Parthiv Meduri — Full Stack ([github.com/Parthiv19M](https://github.com/Parthiv19M))
+- Saketh KL — AI/ML ([github.com/klsaketh7-psl](https://github.com/klsaketh7-psl))
 
-## 👥 Authors
-
-* **Parthiv Meduri** — Full Stack
-  [github.com/Parthiv19M](https://github.com/Parthiv19M)
-* **Saketh KL** — AI/ML
-  [github.com/klsaketh7-psl](https://github.com/klsaketh7-psl)
-
----
-
-## 📄 License
-
+📄 **License**
 MIT License
-
----
 
 ⭐ **Star this repo if you find it useful!**
