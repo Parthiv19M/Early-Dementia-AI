@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { useLocation } from 'wouter';
-import { ArrowLeft, Brain, Eye, ShieldCheck, AlertTriangle, AlertOctagon, Lightbulb, CheckCircle2, XCircle, RotateCcw, Copy, Check } from 'lucide-react';
+import { jsPDF } from 'jspdf';
+import { ArrowLeft, Brain, Eye, ShieldCheck, AlertTriangle, AlertOctagon, Lightbulb, CheckCircle2, XCircle, RotateCcw, Copy, Check, FileDown } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Card, Badge, Button } from '@/components/ui';
 import { getInsightSummary, getRiskDescription, getScoreExplanation } from '@/lib/assessment-utils';
@@ -13,12 +14,14 @@ export default function Results() {
   const [_, setLocation] = useLocation();
   const { latestResult, setLatestResult, setChallengeWords, language } = useAppStore();
   const [copied, setCopied] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const translations = {
     en: {
       newAnalysis: 'New Analysis',
       resultsTitle: 'Analysis Results',
       startOver: 'Start Over',
+      downloadReport: 'Download Report',
       patientId: 'Patient ID:',
       copied: 'Copied!',
       savedOn: 'Saved',
@@ -52,6 +55,7 @@ export default function Results() {
       newAnalysis: 'नया विश्लेषण',
       resultsTitle: 'विश्लेषण के परिणाम',
       startOver: 'फिर से शुरू करें',
+      downloadReport: 'रिपोर्ट डाउनलोड करें',
       patientId: 'रोगी आईडी:',
       copied: 'कॉपी किया गया!',
       savedOn: 'सहेजा गया',
@@ -71,19 +75,88 @@ export default function Results() {
       wordsRecalled: 'शब्द याद आए',
       averageOfBoth: 'दोनों का औसत',
       scoreExplanation: 'स्कोर का स्पष्टीकरण',
-      recallDetails: 'स्मृति रिकॉल विवरण',
+      recallDetails: 'स्मृति विवरण',
       recalled: 'याद आया',
       missed: 'छूट गया',
       insightSummary: 'अंतर्दृष्टि सारांश',
       noObservations: 'कोई विशिष्ट अवलोकन दर्ज नहीं किया गया।',
       recommendations: 'सिफ़ारिशें',
-      disclaimerTitle: 'महत्वपूर्ण अस्वीकरण',
+      disclaimerTitle: 'महत्वपूर्ण सूचना',
       confidenceScore: 'विश्वास स्कोर:',
-      disclaimerText: '⚠️ यह एक एआई-आधारित स्क्रीनिंग उपकरण है और चिकित्सा निदान नहीं है। औपचारिक संज्ञानात्मक मूल्यांकन और चिकित्सा सलाह के लिए हमेशा स्वास्थ्य देखभाल पेशेवर से परामर्श लें।'
+      disclaimerText: '⚠️ यह एक एआई-आधारित प्रारंभिक जांच उपकरण है और चिकित्सा निदान नहीं है। औपचारिक मूल्यांकन और चिकित्सा सलाह के लिए हमेशा डॉक्टर से परामर्श लें।'
     }
   };
 
   const t = language === 'hi' ? translations.hi : translations.en;
+
+  const handleDownloadPdf = async () => {
+    if (!latestResult) return;
+    setIsGenerating(true);
+
+    try {
+      const doc = new jsPDF();
+      const timestamp = format(new Date(latestResult.timestamp), 'PPP p');
+      
+      // Header
+      doc.setFillColor(37, 99, 235); // Medical Blue
+      doc.rect(0, 0, 210, 40, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(22);
+      doc.text("CognoCare Assessment Report", 20, 25);
+      
+      // Content
+      doc.setTextColor(33, 33, 33);
+      doc.setFontSize(12);
+      doc.text(`Patient ID: ${latestResult.patientId}`, 20, 55);
+      doc.text(`Date: ${timestamp}`, 20, 65);
+      
+      doc.setDrawColor(200, 200, 200);
+      doc.line(20, 75, 190, 75);
+      
+      // Scores
+      doc.setFontSize(16);
+      doc.text("Summary of Results", 20, 90);
+      
+      doc.setFontSize(12);
+      doc.text(`Cognitive Score: ${Math.round(latestResult.combinedScore)}/100`, 20, 105);
+      doc.text(`Risk Level: ${latestResult.risk.toUpperCase()}`, 20, 115);
+      
+      // Observations
+      doc.setFontSize(14);
+      doc.text("Observations:", 20, 135);
+      doc.setFontSize(10);
+      let y = 145;
+      latestResult.observations.forEach(obs => {
+        const splitText = doc.splitTextToSize(`• ${obs}`, 170);
+        doc.text(splitText, 20, y);
+        y += (splitText.length * 5) + 2;
+      });
+      
+      // Recommendations
+      doc.setFontSize(14);
+      doc.text("Recommendations:", 20, y + 10);
+      doc.setFontSize(10);
+      y += 20;
+      latestResult.recommendations.forEach(rec => {
+        const splitText = doc.splitTextToSize(`• ${rec}`, 170);
+        doc.text(splitText, 20, y);
+        y += (splitText.length * 5) + 2;
+      });
+      
+      // Footer
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      const footerText = "CognoCare — AI-Based Early Dementia Screening Platform. This is not a clinical diagnosis.";
+      doc.text(footerText, 20, 280);
+      
+      doc.save(`CognoCare_Report_${latestResult.patientId}.pdf`);
+    } catch (err) {
+      console.error("PDF Export failed:", err);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   useEffect(() => {
     if (!latestResult) {
@@ -127,7 +200,6 @@ export default function Results() {
   const scoreExplanation = getScoreExplanation(combinedScore);
   const insightSummary = getInsightSummary(latestResult.observations);
 
-  // Retrieve previous history for the patient (Task 2)
   const history = getAssessmentsByPatientId(latestResult.patientId);
   const previousAssessment = history.length > 1 ? history[1] : null;
 
@@ -143,7 +215,6 @@ export default function Results() {
 
   const progress = getProgressInfo();
 
-  // Gauge math
   const radius = 65;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (combinedScore / 100) * circumference;
@@ -165,7 +236,6 @@ export default function Results() {
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto pb-12">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <button
@@ -176,18 +246,20 @@ export default function Results() {
           </button>
           <h1 className="text-3xl font-display font-bold">{t.resultsTitle}</h1>
         </div>
-        <Button variant="outline" onClick={handleNewTest} className="gap-2 transition-all hover:scale-105 active:scale-95 shadow-sm">
-          <RotateCcw className="w-4 h-4" /> {t.startOver}
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleDownloadPdf} disabled={isGenerating} className="gap-2 transition-all hover:scale-105 shadow-sm border-primary/20">
+            <FileDown className="w-4 h-4" /> {isGenerating ? '...' : t.downloadReport}
+          </Button>
+          <Button variant="outline" onClick={handleNewTest} className="gap-2 transition-all hover:scale-105 active:scale-95 shadow-sm">
+            <RotateCcw className="w-4 h-4" /> {t.startOver}
+          </Button>
+        </div>
       </div>
 
       <motion.div variants={container} initial="hidden" animate="show" className="space-y-8">
-
-        {/* ═══════ Combined Score — Big & Centered ═══════ */}
         <motion.div variants={item}>
           <Card className="relative overflow-hidden">
             <div className={`absolute inset-0 opacity-[0.03] ${riskColors.bg}`} />
-
             <div className="relative z-10 flex flex-col items-center text-center p-8 gap-6">
               <div className="flex flex-wrap items-center justify-center gap-3">
                 <div className="flex items-center gap-2">
@@ -215,13 +287,9 @@ export default function Results() {
                 </span>
               </div>
 
-              {/* Giant gauge */}
               <div className="relative w-56 h-56 flex items-center justify-center">
                 <svg className="w-full h-full transform -rotate-90">
-                  <circle
-                    cx="112" cy="112" r={radius}
-                    className="stroke-secondary fill-none" strokeWidth="16"
-                  />
+                  <circle cx="112" cy="112" r={radius} className="stroke-secondary fill-none" strokeWidth="16" />
                   <motion.circle
                     cx="112" cy="112" r={radius}
                     className={`${riskColors.stroke} fill-none`}
@@ -247,7 +315,6 @@ export default function Results() {
                 </div>
               </div>
 
-              {/* Risk badge */}
               <div className="flex items-center gap-3">
                 <div className={`w-12 h-12 rounded-2xl ${riskColors.bg} ${riskColors.text} flex items-center justify-center`}>
                   {getRiskIcon(latestResult.risk)}
@@ -256,7 +323,6 @@ export default function Results() {
                   ⚠️ {latestResult.risk} {t.riskSuffix}
                 </Badge>
               </div>
-
               <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
                 {getRiskDescription(latestResult.risk)}
               </p>
@@ -264,7 +330,6 @@ export default function Results() {
           </Card>
         </motion.div>
 
-        {/* ═══════ Progress Insight — Task 2 ═══════ */}
         <motion.div variants={item}>
           <Card className="p-0 overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 group border-none shadow-lg">
             <div className="flex flex-col md:flex-row shadow-sm">
@@ -300,16 +365,12 @@ export default function Results() {
           </Card>
         </motion.div>
 
-        {/* ═══════ Score Breakdown ═══════ */}
         <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* API Score */}
           <Card className="p-6 text-center transition-all hover:bg-secondary/20">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{t.speechScore}</p>
             <p className="text-4xl font-display font-bold text-primary">{Math.round(latestResult.apiScore)}</p>
             <p className="text-xs text-muted-foreground mt-1">{t.fromAi}</p>
           </Card>
-
-          {/* Memory Score */}
           <Card className="p-6 text-center transition-all hover:bg-secondary/20">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{t.memoryScore}</p>
             <p className={`text-4xl font-display font-bold ${latestResult.memoryScore >= 67 ? 'text-success' : latestResult.memoryScore >= 34 ? 'text-warning' : 'text-destructive'}`}>
@@ -319,8 +380,6 @@ export default function Results() {
               {latestResult.recalledWords.length}/{latestResult.challengeWords.length} {t.wordsRecalled}
             </p>
           </Card>
-
-          {/* Combined */}
           <Card className={`p-6 text-center border-2 ${riskColors.border} transition-all hover:bg-secondary/20`}>
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{t.combinedScore}</p>
             <p className={`text-4xl font-display font-bold ${riskColors.text}`}>{Math.round(combinedScore)}</p>
@@ -328,7 +387,6 @@ export default function Results() {
           </Card>
         </motion.div>
 
-        {/* ═══════ Memory Recall Details ═══════ */}
         <motion.div variants={item}>
           <Card className="p-8 transition-all hover:shadow-lg">
             <h3 className="text-lg font-bold font-display mb-4">{t.scoreExplanation}</h3>
@@ -367,7 +425,6 @@ export default function Results() {
           </Card>
         </motion.div>
 
-        {/* ═══════ Observations ═══════ */}
         <motion.div variants={item}>
           <Card className="p-8 transition-all hover:shadow-lg">
             <h3 className="text-lg font-bold font-display mb-6 flex items-center gap-2">

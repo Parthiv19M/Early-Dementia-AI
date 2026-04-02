@@ -1,18 +1,30 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
+import { Loader2 } from "lucide-react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const Home = lazy(() => import("@/pages/home"));
+const Results = lazy(() => import("@/pages/results"));
+const History = lazy(() => import("@/pages/history"));
+const DoctorDashboard = lazy(() => import("@/pages/doctor-dashboard"));
+const Chatbot = lazy(() => import("@/pages/chatbot"));
+const NotFound = lazy(() => import("@/pages/not-found"));
 
 import { AppProvider } from "@/lib/store";
 import { Layout } from "@/components/layout";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-import Home from "@/pages/home";
-import Results from "@/pages/results";
-import History from "@/pages/history";
-import DoctorDashboard from "@/pages/doctor-dashboard";
-import Chatbot from "@/pages/chatbot";
-import NotFound from "@/pages/not-found";
+function PageLoader() {
+  return (
+    <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 animate-in fade-in duration-500">
+      <Loader2 className="w-10 h-10 text-primary animate-spin" />
+      <p className="text-sm font-medium text-muted-foreground animate-pulse">
+        Loading health insights...
+      </p>
+    </div>
+  );
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -61,14 +73,16 @@ class AppErrorBoundary extends React.Component<
 function Router() {
   return (
     <Layout>
-      <Switch>
-        <Route path="/" component={Home} />
-        <Route path="/results" component={Results} />
-        <Route path="/history" component={History} />
-        <Route path="/dashboard" component={DoctorDashboard} />
-        <Route path="/chatbot" component={Chatbot} />
-        <Route component={NotFound} />
-      </Switch>
+      <Suspense fallback={<PageLoader />}>
+        <Switch>
+          <Route path="/" component={Home} />
+          <Route path="/results" component={Results} />
+          <Route path="/history" component={History} />
+          <Route path="/dashboard" component={DoctorDashboard} />
+          <Route path="/chatbot" component={Chatbot} />
+          <Route component={NotFound} />
+        </Switch>
+      </Suspense>
     </Layout>
   );
 }

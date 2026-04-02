@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Users, Activity, Brain, Clock, Search, TrendingUp, Calendar } from 'lucide-react';
+import { Users, Activity, Brain, Clock, Search, TrendingUp, Calendar, LineChart as ChartIcon } from 'lucide-react';
 import { Card, Input, Button, ScoreGauge, Badge } from '@/components/ui';
 import { getStoredAssessments, getAssessmentsByPatientId, type AssessmentRecord } from '@/lib/assessment-storage';
 import { useAppStore } from '@/lib/store';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
 export default function DoctorDashboard() {
   const { language } = useAppStore();
@@ -30,11 +31,13 @@ export default function DoctorDashboard() {
       snapshotCardHeader: 'Current Cognitive Snapshot',
       averageScore: 'Average Score',
       recentTrend: 'Recent Assessment Trend',
-      noObservations: 'No major speech warning signs were recorded.'
+      noObservations: 'No major speech warning signs were recorded.',
+      trendGraph: 'Cognitive Trend Graph',
+      historyTitle: 'Assessment History'
     },
     hi: {
       title: 'प्रदाता डैशबोर्ड',
-      subtitle: 'सहेजे गए मूल्यांकनों की समीक्षा करें, संज्ञानात्मक स्क्रीनिंग प्रवृत्तियों की निगरानी करें, और रोगी आईडी द्वारा जल्दी से खोजें।',
+      subtitle: 'सहेजे गए मूल्यांकनों की समीक्षा करें, प्रवृत्तियों की निगरानी करें और रोगी आईडी द्वारा खोजें।',
       searchPlaceholder: 'रोगी आईडी खोजें...',
       viewPatient: 'रोगी देखें',
       snapshotTitle: 'समग्र अवलोकन',
@@ -44,14 +47,16 @@ export default function DoctorDashboard() {
       statsTotalHelp: 'इस डिवाइस पर उपलब्ध सहेजे गए मूल्यांकन।',
       statsLatest: 'नवीनतम स्कोर',
       statsLatestHelp: 'नवीनतम जोखिम:',
-      statsLatestEmpty: 'इस दृश्य को भरने के लिए एक मूल्यांकन चलाएं।',
+      statsLatestEmpty: 'विवरण देखने के लिए मूल्यांकन चलाएं।',
       statsTrend: 'जोखिम रुझान',
-      statsTrendHelp: 'सबसे पुराने रिकॉर्ड से नवीनतम तक परिवर्तन।',
-      emptyState: 'प्रदाता डैशबोर्ड को भरने के लिए रोगी आईडी खोजें या मूल्यांकन पूरा करें।',
-      snapshotCardHeader: 'वर्तमान संज्ञानात्मक स्थिति',
+      statsTrendHelp: 'शुरुआत से अंत तक परिवर्तन।',
+      emptyState: ' डैशबोर्ड को भरने के लिए रोगी आईडी खोजें या मूल्यांकन पूरा करें।',
+      snapshotCardHeader: 'संज्ञानात्मक स्थिति',
       averageScore: 'औसत स्कोर',
-      recentTrend: 'हालिया मूल्यांकन रुझान',
-      noObservations: 'कोई बड़ा भाषण चेतावनी संकेत दर्ज नहीं किया गया था।'
+      recentTrend: 'हालिया रुझान',
+      noObservations: 'कोई बड़ी चेतावनी दर्ज नहीं की गई।',
+      trendGraph: 'संज्ञानात्मक रुझान ग्राफ',
+      historyTitle: 'मूल्यांकन इतिहास'
     }
   };
 
@@ -70,12 +75,23 @@ export default function DoctorDashboard() {
   const totalAssessments = records.length;
   const averageScore =
     totalAssessments > 0
-      ? Math.round(records.reduce((sum: number, record: AssessmentRecord) => sum + record.combinedScore, 0) / totalAssessments)
+      ? Math.round(records.reduce((sum, record) => sum + record.combinedScore, 0) / totalAssessments)
       : 0;
+  
   const trend =
     totalAssessments > 1
       ? Math.round(records[0].combinedScore - records[records.length - 1].combinedScore)
       : 0;
+
+  const chartData = useMemo(() => {
+    return [...records]
+      .reverse()
+      .map(r => ({
+        date: new Date(r.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+        score: Math.round(r.combinedScore),
+        risk: r.risk
+      }));
+  }, [records]);
 
   const trendRecords = useMemo(() => records.slice(0, 5), [records]);
 
@@ -147,8 +163,8 @@ export default function DoctorDashboard() {
             </div>
             <h3 className="font-semibold text-muted-foreground">{t.statsTrend}</h3>
           </div>
-          <p className={`text-4xl font-display font-bold ${trend > 0 ? 'text-destructive' : 'text-success'}`}>
-            {trend > 0 ? '+' : ''}{trend}
+          <p className={`text-4xl font-display font-bold ${trend > 0 ? 'text-success' : 'text-destructive'}`}>
+            {trend >= 0 ? '+' : ''}{trend}
           </p>
           <p className="text-sm text-muted-foreground mt-2">{t.statsTrendHelp}</p>
         </Card>
@@ -160,6 +176,36 @@ export default function DoctorDashboard() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in slide-in-from-bottom duration-700">
+          {/* Recent Trend Card with Graph */}
+          <Card className="md:col-span-2 p-6 transition-all hover:shadow-lg">
+             <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-bold font-display flex items-center gap-2">
+                  <ChartIcon className="w-5 h-5 text-primary" /> {t.trendGraph}
+                </h3>
+             </div>
+             <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData}>
+                    <defs>
+                      <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#2563eb" stopOpacity={0.1}/>
+                        <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                    <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#888'}} />
+                    <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#888'}} />
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                      cursor={{ stroke: '#2563eb', strokeWidth: 2, strokeDasharray: '5 5' }}
+                    />
+                    <Area type="monotone" dataKey="score" stroke="#2563eb" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+             </div>
+          </Card>
+
+          {/* Current Status Sidebar */}
           <Card className="p-6 flex flex-col items-center justify-center text-center transition-all hover:shadow-lg">
             <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-6 border-b border-border pb-2 w-full">
               {t.snapshotCardHeader}
@@ -182,15 +228,16 @@ export default function DoctorDashboard() {
             </div>
           </Card>
 
-          <Card className="md:col-span-2 p-0 overflow-hidden transition-all hover:shadow-lg flex flex-col">
+          {/* Detailed History Table */}
+          <Card className="md:col-span-3 p-0 overflow-hidden transition-all hover:shadow-lg flex flex-col mt-6">
             <div className="p-6 border-b border-border bg-secondary/30 flex items-center justify-between">
               <h3 className="text-lg font-bold font-display flex items-center gap-2">
-                <Clock className="w-5 h-5 text-primary" /> {t.recentTrend}
+                <Clock className="w-5 h-5 text-primary" /> {t.historyTitle}
               </h3>
             </div>
             <div className="divide-y divide-border overflow-y-auto max-h-[400px]">
               {trendRecords.map((record, idx) => (
-                <div key={record.id} className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-secondary/10 transition-colors animate-in slide-in-from-right duration-500" style={{ animationDelay: `${idx * 100}ms` }}>
+                <div key={record.id} className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-secondary/10 transition-colors">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <Calendar className="w-3.5 h-3.5 text-muted-foreground" />

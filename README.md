@@ -15,13 +15,11 @@
 
 ---
 
-## 🎯 Overview
-
-Dementia affects millions globally, yet early detection remains delayed and inaccessible.
-
-**CognoCare** provides a fast, non-invasive, and AI-assisted cognitive screening tool that evaluates early signs through speech patterns, memory recall, and behavioral responses.
-
 > ⚡ Early detection can slow progression by up to 40% — this platform makes screening accessible in under 5 minutes.
+
+Built a full-stack AI-powered healthcare application deployed on Vercel + Render with real-time speech analysis.
+
+Currently uses local storage for rapid prototyping; designed to scale with PostgreSQL + authentication.
 
 ---
 
