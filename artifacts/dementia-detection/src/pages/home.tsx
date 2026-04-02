@@ -323,8 +323,8 @@ export default function Home() {
         <div className="absolute -inset-10 bg-primary/5 blur-[120px] -z-10 rounded-full" />
         
         <Card className="p-10 border-none shadow-2xl relative overflow-hidden bg-white/90 backdrop-blur-sm">
-           <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-              <Brain className="w-32 h-32" />
+           <div className="absolute bottom-0 right-0 p-6 opacity-[0.03] pointer-events-none translate-x-8 translate-y-8">
+              <Brain className="w-56 h-56" />
            </div>
 
            <AnimatePresence mode="wait">
@@ -341,10 +341,10 @@ export default function Home() {
                      <h2 className="text-2xl font-display font-bold text-foreground">{t.memoryTitle}</h2>
                   </div>
 
-                  <div className="flex flex-wrap justify-center gap-4">
+                   <div className="flex flex-row items-center justify-center gap-3 w-full overflow-x-auto pb-2">
                     {challengeWords.map((word, i) => (
-                      <div key={i} className="px-8 py-5 bg-secondary rounded-2xl border-2 border-primary/10 shadow-sm">
-                        <span className="text-3xl font-display font-black text-primary">{word}</span>
+                      <div key={i} className="px-6 py-4 bg-secondary rounded-2xl border-2 border-primary/10 shadow-sm whitespace-nowrap">
+                        <span className="text-2xl md:text-3xl font-display font-black text-primary">{word}</span>
                       </div>
                     ))}
                   </div>
