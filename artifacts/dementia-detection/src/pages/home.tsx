@@ -169,6 +169,10 @@ export default function Home() {
     if (countdownRef.current) clearInterval(countdownRef.current);
     ensurePatientId();
     setStep('record');
+    // Automate the transition to recording as per Task 2
+    setTimeout(() => {
+      handleStartRecording();
+    }, 300);
   };
 
   const handleAnalyze = async () => {
@@ -340,20 +344,6 @@ export default function Home() {
            </div>
         </Card>
 
-        {/* Professional Disclaimer Section */}
-        <div className="max-w-md border-t border-border/60 pt-6 space-y-4">
-           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3">
-              <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-              <p className="text-[12px] leading-relaxed text-amber-900 font-semibold italic">
-                {t.disclaimer}
-              </p>
-           </div>
-           
-           <div className="flex items-center gap-3 text-[11px] text-muted-foreground font-bold uppercase tracking-widest px-1">
-              <ClipboardCheck className="w-4 h-4 text-primary" />
-              {t.privacyNote}
-           </div>
-        </div>
       </div>
 
       {/* Right Column — Interactive Assessment Protocol */}
@@ -421,11 +411,17 @@ export default function Home() {
                       </div>
                       <button 
                         onClick={isRecording ? handleStopRecording : handleStartRecording}
-                        className={`w-32 h-32 rounded-full flex items-center justify-center transition-all duration-500 shadow-2xl ${isRecording ? 'bg-destructive text-white scale-110' : 'bg-primary text-white hover:bg-primary/90'}`}
+                        className={`w-32 h-32 rounded-full flex items-center justify-center transition-all duration-500 shadow-2xl ${isRecording ? 'bg-destructive text-white scale-110 ring-8 ring-destructive/20 animate-pulse' : 'bg-primary text-white hover:bg-primary/90'}`}
                       >
                          {isRecording ? <Square className="w-8 h-8 fill-current" /> : <Mic className="w-12 h-12" />}
                       </button>
                       <p className="text-sm font-black text-muted-foreground uppercase tracking-widest">{isRecording ? t.tapStop : t.tapStart}</p>
+                      {/* Task 4: Error Fallback */}
+                      {error && (
+                        <div className="flex items-center gap-2 text-destructive font-bold text-xs animate-in slide-in-from-top px-4 py-2 bg-destructive/5 rounded-lg border border-destructive/10">
+                          <ShieldAlert className="w-4 h-4" /> {error}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <textarea 
@@ -470,6 +466,21 @@ export default function Home() {
               )}
            </AnimatePresence>
         </Card>
+
+        {/* Repositioned Notices Section (Task 1) */}
+        <div className="mt-6 space-y-4 animate-in fade-in duration-1000 delay-500">
+           <div className="bg-amber-50/50 backdrop-blur-sm border border-amber-100 rounded-2xl p-4 flex gap-3 shadow-sm">
+              <ShieldAlert className="w-5 h-5 text-amber-600/70 shrink-0 mt-0.5" />
+              <p className="text-[11px] leading-relaxed text-amber-900/80 font-medium">
+                {t.disclaimer}
+              </p>
+           </div>
+           
+           <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-black uppercase tracking-widest px-1 opacity-60">
+              <ClipboardCheck className="w-3.5 h-3.5 text-primary" />
+              {t.privacyNote}
+           </div>
+        </div>
       </div>
     </div>
   );
