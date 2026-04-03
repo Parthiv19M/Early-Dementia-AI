@@ -17,12 +17,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="bg-white border-b border-border/50 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 md:h-20 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-              <Brain className="w-6 h-6 text-primary" />
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+              <Brain className="w-5 h-5 md:w-6 md:h-6 text-primary" />
             </div>
-            <span className="font-display font-bold text-2xl tracking-tight text-foreground">
+            <span className="font-display font-bold text-xl md:text-2xl tracking-tight text-foreground">
               Syn<span className="text-primary">apta</span>
             </span>
           </Link>
@@ -50,7 +50,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:px-8 lg:py-4 relative">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-2 pb-24 md:p-6 lg:px-8 lg:py-4 relative">
         <AnimatePresence mode="wait">
           <motion.div
             key={location}
@@ -74,12 +74,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <Link 
               key={item.path} 
               href={item.path}
-              className={`flex flex-col items-center gap-1 p-2 rounded-lg ${
+              className={`flex flex-col items-center gap-1 p-1.5 rounded-lg ${
                 isActive ? 'text-primary' : 'text-muted-foreground'
               }`}
             >
-              <Icon className="w-6 h-6" />
-              <span className="text-[10px] font-medium">{item.label}</span>
+              <Icon className="w-5 h-5" />
+              <span className="text-[9px] font-medium">{item.label}</span>
             </Link>
           );
         })}

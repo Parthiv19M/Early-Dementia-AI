@@ -117,7 +117,7 @@ export default function DoctorDashboard() {
               onChange={(e) => setPatientId(e.target.value.toUpperCase())}
               className="bg-white/95 border-transparent focus:border-white text-foreground placeholder:text-muted-foreground/60 transition-all focus:ring-2 focus:ring-white/20"
             />
-            <Button type="submit" variant="secondary" className="shrink-0 text-primary font-bold hover:scale-[1.05] active:scale-[0.95] transition-all duration-200">
+            <Button type="submit" variant="secondary" className="shrink-0 px-3 py-2 text-sm text-primary font-bold hover:scale-[1.05] active:scale-[0.95] transition-all duration-200">
               <Search className="w-4 h-4 mr-2" /> {t.viewPatient}
             </Button>
           </form>

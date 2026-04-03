@@ -34,7 +34,7 @@ export default function Learn() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-20 px-4 sm:px-6">
+    <div className="max-w-4xl mx-auto space-y-6 pb-20 px-4 sm:px-6">
       {/* SECTION 1 — WHAT IS SYNAPTA? */}
       <motion.section 
         initial={{ opacity: 0, y: 20 }}

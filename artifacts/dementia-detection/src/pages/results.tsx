@@ -260,7 +260,7 @@ export default function Results() {
         <motion.div variants={item}>
           <Card className="relative overflow-hidden">
             <div className={`absolute inset-0 opacity-[0.03] ${riskColors.bg}`} />
-            <div className="relative z-10 flex flex-col items-center text-center p-8 gap-6">
+            <div className="relative z-10 flex flex-col items-center text-center p-6 md:p-8 gap-6">
               <div className="flex flex-wrap items-center justify-center gap-3">
                 <div className="flex items-center gap-2">
                    <Badge className="px-4 py-2 text-sm font-semibold">
@@ -287,9 +287,10 @@ export default function Results() {
                 </span>
               </div>
 
-              <div className="relative w-56 h-56 flex items-center justify-center">
+              <div className="relative w-48 h-48 md:w-56 md:h-56 flex items-center justify-center">
                 <svg className="w-full h-full transform -rotate-90">
-                  <circle cx="112" cy="112" r={radius} className="stroke-secondary fill-none" strokeWidth="16" />
+                  <circle cx="96" cy="96" r={60} className="stroke-secondary fill-none md:hidden" strokeWidth="14" />
+                  <circle cx="112" cy="112" r={radius} className="hidden md:block stroke-secondary fill-none" strokeWidth="16" />
                   <motion.circle
                     cx="112" cy="112" r={radius}
                     className={`${riskColors.stroke} fill-none`}
@@ -388,14 +389,14 @@ export default function Results() {
         </motion.div>
 
         <motion.div variants={item}>
-          <Card className="p-8 transition-all hover:shadow-lg">
+          <Card className="p-6 md:p-8 transition-all hover:shadow-lg">
             <h3 className="text-lg font-bold font-display mb-4">{t.scoreExplanation}</h3>
             <p className="text-sm text-muted-foreground leading-relaxed italic border-l-4 border-primary/20 pl-4">{scoreExplanation}</p>
           </Card>
         </motion.div>
 
         <motion.div variants={item}>
-          <Card className="p-8 transition-all hover:shadow-lg">
+          <Card className="p-6 md:p-8 transition-all hover:shadow-lg">
             <h3 className="text-lg font-bold font-display mb-5 flex items-center gap-2">
               <Lightbulb className="w-5 h-5 text-accent" />
               {t.recallDetails}
@@ -426,7 +427,7 @@ export default function Results() {
         </motion.div>
 
         <motion.div variants={item}>
-          <Card className="p-8 transition-all hover:shadow-lg">
+          <Card className="p-6 md:p-8 transition-all hover:shadow-lg">
             <h3 className="text-lg font-bold font-display mb-6 flex items-center gap-2">
               <Eye className="w-5 h-5 text-primary" />
               {t.insightSummary}
@@ -458,7 +459,7 @@ export default function Results() {
         </motion.div>
 
         <motion.div variants={item}>
-          <Card className="p-8 transition-all hover:shadow-lg">
+          <Card className="p-6 md:p-8 transition-all hover:shadow-lg">
             <h3 className="text-lg font-bold font-display mb-5">{t.recommendations}</h3>
             <div className="space-y-3">
               {latestResult.recommendations.map((recommendation, idx) => (

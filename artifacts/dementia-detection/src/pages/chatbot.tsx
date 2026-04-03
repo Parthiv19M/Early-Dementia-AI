@@ -80,10 +80,10 @@ export default function Chatbot() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto h-[calc(100vh-8rem)] flex flex-col relative">
+    <div className="max-w-4xl mx-auto h-[calc(100vh-7rem)] md:h-[calc(100vh-8rem)] flex flex-col relative px-4">
       <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent rounded-3xl -z-10 pointer-events-none" />
 
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4 md:mb-6">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-white shadow-lg shadow-black/5 flex items-center justify-center p-1 overflow-hidden border border-border">
             <img
@@ -123,14 +123,14 @@ export default function Chatbot() {
           {t.helpText}
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 bg-secondary/20">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-4 bg-secondary/20 transition-all">
           <AnimatePresence initial={false}>
             {messages.map((msg, idx) => (
               <motion.div
                 key={idx}
                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                className={`flex gap-4 ${msg.role === "user" ? "flex-row-reverse" : ""}`}
+                className={`flex gap-3 md:gap-4 ${msg.role === "user" ? "flex-row-reverse" : ""}`}
               >
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
@@ -199,7 +199,7 @@ export default function Chatbot() {
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="p-4 bg-white border-t border-border">
+        <div className="p-3 md:p-4 bg-white border-t border-border">
           <form
             onSubmit={handleSend}
             className="flex gap-3 relative items-center"

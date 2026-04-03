@@ -130,7 +130,7 @@ export default function History() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <Card className="lg:col-span-3 p-8 transition-all hover:shadow-xl bg-white border-none shadow-md overflow-hidden relative">
+          <Card className="lg:col-span-3 p-6 md:p-8 transition-all hover:shadow-xl bg-white border-none shadow-md overflow-hidden relative">
              <div className="absolute top-0 right-0 p-8 opacity-5">
                 <TrendingUp className="w-32 h-32" />
              </div>
@@ -144,7 +144,7 @@ export default function History() {
                     <p className="text-sm text-muted-foreground font-bold mt-1">ID: {activeSearch}</p>
                   </div>
                   <div className="flex gap-3">
-                    <Badge variant="secondary" className="px-4 py-1 font-bold">{records.length} {t.assessmentsLabel}</Badge>
+                    <Badge variant="outline" className="px-4 py-1 font-bold bg-secondary/50 border-primary/10">{records.length} {t.assessmentsLabel}</Badge>
                     {latestRecord && (
                       <Badge className={`px-4 py-1 font-bold ${latestRecord.risk === 'High' ? 'bg-destructive/10 text-destructive border-destructive/20' : latestRecord.risk === 'Medium' ? 'bg-warning/10 text-warning border-warning/20' : 'bg-success/10 text-success border-success/20'}`}>
                         LATEST: {latestRecord.risk} {t.riskSuffix}
@@ -190,38 +190,40 @@ export default function History() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {records.map((record, idx) => (
-                <Card key={record.id} className="p-0 overflow-hidden border-none shadow-sm hover:shadow-md transition-all group animate-in slide-in-from-bottom duration-500" style={{ animationDelay: `${idx * 100}ms` }}>
-                   <div className="flex h-full">
-                      <div className={`w-2 shrink-0 ${record.risk === 'High' ? 'bg-destructive' : record.risk === 'Medium' ? 'bg-warning' : 'bg-success'}`} />
-                      <div className="p-6 flex-1 bg-white">
-                         <div className="flex justify-between items-start mb-4">
-                            <div className="space-y-1">
-                               <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none">
-                                  {format(new Date(record.timestamp), 'PPPP')}
-                               </p>
-                               <h4 className="text-lg font-bold text-foreground">Score: {record.combinedScore}</h4>
-                            </div>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              onClick={() => { if (confirm(t.deleteConfirm)) { deleteAssessment(record.id); setRecords(getAssessmentsByPatientId(activeSearch)); } }}
-                              className="w-8 h-8 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/5"
-                            >
-                               <Trash2 className="w-4 h-4" />
-                            </Button>
-                         </div>
-                         
-                         <div className="flex gap-2 mb-4">
-                            <Badge variant="outline" className="text-[10px] font-bold">SPEECH: {Math.round(record.apiScore)}</Badge>
-                            <Badge variant="outline" className="text-[10px] font-bold">MEMORY: {Math.round(record.memoryScore)}</Badge>
-                         </div>
-                         
-                         <div className="bg-secondary/30 rounded-xl p-3 text-[12px] text-foreground/80 font-medium leading-relaxed border border-transparent group-hover:border-primary/10 transition-colors">
-                            {record.observations[0] || t.noObservations}
-                         </div>
-                      </div>
-                   </div>
-                </Card>
+                <div key={record.id} className="animate-in slide-in-from-bottom duration-500" style={{ animationDelay: `${idx * 100}ms` }}>
+                  <Card className="p-0 overflow-hidden border-none shadow-sm hover:shadow-md transition-all group">
+                     <div className="flex h-full">
+                        <div className={`w-2 shrink-0 ${record.risk === 'High' ? 'bg-destructive' : record.risk === 'Medium' ? 'bg-warning' : 'bg-success'}`} />
+                        <div className="p-4 md:p-6 flex-1 bg-white">
+                           <div className="flex justify-between items-start mb-4">
+                              <div className="space-y-1">
+                                 <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none">
+                                    {format(new Date(record.timestamp), 'PPPP')}
+                                 </p>
+                                 <h4 className="text-lg font-bold text-foreground">Score: {record.combinedScore}</h4>
+                              </div>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => { if (confirm(t.deleteConfirm)) { deleteAssessment(record.id); setRecords(getAssessmentsByPatientId(activeSearch)); } }}
+                                className="w-8 h-8 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/5"
+                              >
+                                 <Trash2 className="w-4 h-4" />
+                              </Button>
+                           </div>
+                           
+                           <div className="flex gap-2 mb-4">
+                              <Badge variant="outline" className="text-[10px] font-bold">SPEECH: {Math.round(record.apiScore)}</Badge>
+                              <Badge variant="outline" className="text-[10px] font-bold">MEMORY: {Math.round(record.memoryScore)}</Badge>
+                           </div>
+                           
+                           <div className="bg-secondary/30 rounded-xl p-3 text-[12px] text-foreground/80 font-medium leading-relaxed border border-transparent group-hover:border-primary/10 transition-colors">
+                              {record.observations[0] || t.noObservations}
+                           </div>
+                        </div>
+                     </div>
+                  </Card>
+                </div>
               ))}
             </div>
           </div>

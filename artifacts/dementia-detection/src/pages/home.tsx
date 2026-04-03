@@ -280,7 +280,7 @@ export default function Home() {
   const t = language === 'hi' ? translations.hi : translations.en;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[70vh] py-4">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center py-4">
       {/* Left Column — Context & Details */}
       <div className="space-y-6 animate-in slide-in-from-left duration-700">
         <div>
@@ -341,7 +341,7 @@ export default function Home() {
       <div className="relative">
         <div className="absolute -inset-10 bg-primary/5 blur-[120px] -z-10 rounded-full" />
         
-        <Card className="p-10 border-none shadow-2xl relative overflow-hidden bg-white/90 backdrop-blur-sm">
+        <Card className="p-6 md:p-10 border-none shadow-2xl relative overflow-hidden bg-white/90 backdrop-blur-sm">
            <div className="absolute bottom-0 right-0 p-6 opacity-[0.03] pointer-events-none translate-x-8 translate-y-8">
               <Brain className="w-56 h-56" />
            </div>
@@ -353,7 +353,7 @@ export default function Home() {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 1.05 }}
-                  className="flex flex-col items-center gap-8 min-h-[400px] justify-center"
+                  className="flex flex-col items-center gap-6 min-h-[320px] justify-center"
                 >
                   <div className="text-center space-y-2">
                      <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">{t.medicalCard}</h3>
@@ -364,19 +364,19 @@ export default function Home() {
                     {t.memoryHelp}
                   </p>
 
-                   <div className="flex flex-row items-center justify-center gap-3 w-full overflow-x-auto pb-2">
+                   <div className="flex flex-wrap items-center justify-center gap-2 w-full overflow-hidden">
                     {challengeWords.map((word, i) => (
-                      <div key={i} className="px-6 py-4 bg-secondary rounded-2xl border-2 border-primary/10 shadow-sm whitespace-nowrap">
-                        <span className="text-2xl md:text-3xl font-display font-black text-primary">{word}</span>
+                      <div key={i} className="px-4 py-3 bg-secondary rounded-xl border-2 border-primary/10 shadow-sm whitespace-nowrap">
+                        <span className="text-xl md:text-3xl font-display font-black text-primary">{word}</span>
                       </div>
                     ))}
                   </div>
 
-                  <div className="flex flex-col items-center gap-6">
+                  <div className="flex flex-col items-center gap-4">
                     <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
                        <Clock className="w-4 h-4" /> AUTO-ADVANCE IN {countdown}S
                     </div>
-                    <Button onClick={handleMemorized} size="lg" className="px-10 py-7 text-lg font-bold shadow-lg hover:shadow-primary/20 transition-all">
+                    <Button onClick={handleMemorized} size="lg" className="px-8 py-5 md:px-10 md:py-7 text-base md:text-lg font-bold shadow-lg hover:shadow-primary/20 transition-all">
                       {t.memorizedBtn} <ArrowRight className="w-5 h-5 ml-2" />
                     </Button>
                   </div>
@@ -388,7 +388,7 @@ export default function Home() {
                   key="record"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="flex flex-col items-center gap-8 min-h-[400px] justify-center"
+                  className="flex flex-col items-center gap-4 min-h-[320px] justify-center"
                 >
                   <div className="flex gap-2 p-1 bg-secondary rounded-xl">
                     <button onClick={() => setMode('record')} className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${mode === 'record' ? 'bg-white text-primary shadow-sm' : 'text-muted-foreground'}`}>{t.audioBtn}</button>
@@ -396,7 +396,7 @@ export default function Home() {
                   </div>
 
                   {mode === 'record' ? (
-                    <div className="flex flex-col items-center gap-8 w-full">
+                    <div className="flex flex-col items-center gap-4 w-full">
                       <div className="h-10 w-full flex items-center justify-center">
                         <Waveform isActive={isRecording} />
                       </div>
@@ -428,7 +428,7 @@ export default function Home() {
                    key="recall"
                    initial={{ opacity: 0, scale: 1.1 }}
                    animate={{ opacity: 1, scale: 1 }}
-                   className="flex flex-col items-center gap-8 min-h-[400px] justify-center"
+                   className="flex flex-col items-center gap-6 min-h-[320px] justify-center"
                 >
                    <div className="text-center space-y-2">
                      <Info className="w-10 h-10 text-primary mx-auto mb-4" />
