@@ -295,46 +295,48 @@ export default function Results() {
                 </span>
               </div>
 
-              <div className="relative w-48 h-48 md:w-56 md:h-56 flex items-center justify-center">
-                <svg className="w-full h-full transform -rotate-90">
-                  {/* Mobile Gauge */}
-                  <circle cx="96" cy="96" r={60} className="stroke-secondary fill-none md:hidden" strokeWidth="14" />
-                  <motion.circle
-                    cx="96" cy="96" r={60}
-                    className={`${riskColors.stroke} fill-none md:hidden`}
-                    strokeWidth="14"
-                    strokeLinecap="round"
-                    initial={{ strokeDashoffset: circumference }}
-                    animate={{ strokeDashoffset: 2 * Math.PI * 60 - (combinedScore / 100) * (2 * Math.PI * 60) }}
-                    transition={{ duration: 1.8, ease: "easeOut" }}
-                    strokeDasharray={2 * Math.PI * 60}
-                  />
-
-                  {/* Desktop Gauge */}
-                  <circle cx="112" cy="112" r={radius} className="hidden md:block stroke-secondary fill-none" strokeWidth="16" />
-                  <motion.circle
-                    cx="112" cy="112" r={radius}
-                    className={`${riskColors.stroke} fill-none hidden md:block`}
-                    strokeWidth="16"
-                    strokeLinecap="round"
-                    initial={{ strokeDashoffset: circumference }}
-                    animate={{ strokeDashoffset }}
-                    transition={{ duration: 1.8, ease: "easeOut" }}
-                    strokeDasharray={circumference}
-                    style={{ filter: `drop-shadow(0 0 8px ${riskColors.hex}40)` }}
-                  />
-                </svg>
-                <div className="absolute flex flex-col items-center justify-center">
-                  <motion.span
-                    className="text-6xl font-display font-bold text-foreground"
-                    initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: 0.5, duration: 0.5 }}
-                  >
-                    {Math.round(combinedScore)}
-                  </motion.span>
-                  <span className="text-xs text-muted-foreground font-semibold tracking-wider uppercase mt-1">🧠 {t.cognitiveScore}</span>
-                </div>
+              <div className="flex flex-col items-center">
+                 <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em] mb-4">{t.cognitiveScore}</span>
+                 <div className="relative w-48 h-48 md:w-56 md:h-56 flex items-center justify-center">
+                   <svg className="w-full h-full transform -rotate-90">
+                     {/* Mobile Gauge */}
+                     <circle cx="96" cy="96" r={60} className="stroke-secondary fill-none md:hidden" strokeWidth="14" />
+                     <motion.circle
+                       cx="96" cy="96" r={60}
+                       className={`${riskColors.stroke} fill-none md:hidden`}
+                       strokeWidth="14"
+                       strokeLinecap="round"
+                       initial={{ strokeDashoffset: circumference }}
+                       animate={{ strokeDashoffset: 2 * Math.PI * 60 - (combinedScore / 100) * (2 * Math.PI * 60) }}
+                       transition={{ duration: 1.8, ease: "easeOut" }}
+                       strokeDasharray={2 * Math.PI * 60}
+                     />
+  
+                     {/* Desktop Gauge */}
+                     <circle cx="112" cy="112" r={radius} className="hidden md:block stroke-secondary fill-none" strokeWidth="16" />
+                     <motion.circle
+                       cx="112" cy="112" r={radius}
+                       className={`${riskColors.stroke} fill-none hidden md:block`}
+                       strokeWidth="16"
+                       strokeLinecap="round"
+                       initial={{ strokeDashoffset: circumference }}
+                       animate={{ strokeDashoffset }}
+                       transition={{ duration: 1.8, ease: "easeOut" }}
+                       strokeDasharray={circumference}
+                       style={{ filter: `drop-shadow(0 0 8px ${riskColors.hex}40)` }}
+                     />
+                   </svg>
+                   <div className="absolute flex flex-col items-center justify-center">
+                     <motion.span
+                       className="text-6xl font-display font-bold text-foreground"
+                       initial={{ scale: 0.5, opacity: 0 }}
+                       animate={{ scale: 1, opacity: 1 }}
+                       transition={{ delay: 0.5, duration: 0.5 }}
+                     >
+                       {Math.round(combinedScore)}
+                     </motion.span>
+                   </div>
+                 </div>
               </div>
 
               <div className="flex items-center gap-3">
