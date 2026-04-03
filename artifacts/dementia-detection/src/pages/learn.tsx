@@ -65,7 +65,7 @@ export default function Learn() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
       >
-        <Card className="p-8 border-l-4 border-l-primary shadow-xl bg-white relative overflow-hidden group">
+        <Card className="p-8 border-none shadow-xl bg-white relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-700">
              <Brain className="w-32 h-32 text-primary" />
           </div>
@@ -84,7 +84,7 @@ export default function Learn() {
                 It's not a single disease but a term for several conditions affecting memory, thinking, and social abilities.
               </p>
               
-              <div className="bg-primary/5 border-l-4 border-primary p-6 rounded-r-2xl italic space-y-3">
+              <div className="bg-primary/5 border-none p-6 rounded-2xl italic space-y-3">
                 <p>In diseases like Alzheimer’s:</p>
                 <ul className="list-disc pl-6 space-y-2 font-medium text-foreground/80">
                   <li><strong>Memory-related areas</strong> of the brain get damaged first</li>
@@ -109,7 +109,7 @@ export default function Learn() {
         whileInView="show"
         viewport={{ once: true }}
       >
-        <Card className="p-8 border-l-4 border-l-primary shadow-xl bg-white space-y-8">
+        <Card className="p-8 border-none shadow-xl bg-white space-y-8">
           <div className="text-center sm:text-left space-y-3">
             <h2 className="text-3xl font-display font-bold">How It Works</h2>
             <p className="text-muted-foreground max-w-2xl">
@@ -144,7 +144,7 @@ export default function Learn() {
         whileInView="show"
         viewport={{ once: true }}
       >
-        <Card className="p-8 border-l-4 border-l-primary shadow-xl bg-white space-y-8">
+        <Card className="p-8 border-none shadow-xl bg-white space-y-8">
           <h2 className="text-3xl font-display font-bold text-center sm:text-left">Real-Life Scenarios</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
