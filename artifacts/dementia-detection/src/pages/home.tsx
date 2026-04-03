@@ -57,7 +57,9 @@ export default function Home() {
   const [apiResult, setApiResult] = useState<AnalyzeResult | null>(null);
 
   const [countdown, setCountdown] = useState(10);
-  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [recordingTimer, setRecordingTimer] = useState(10);
+  const countdownRef = useRef<ReturnType<typeof setInterval>|null>(null);
+  const recordingTimerRef = useRef<ReturnType<typeof setInterval>|null>(null);
 
   useEffect(() => {
     const sampleStr = sessionStorage.getItem('synapta_sample');
@@ -96,6 +98,27 @@ export default function Home() {
     }
     return undefined;
   }, [step, challengeWords]);
+
+  useEffect(() => {
+    if (isRecording && mode === 'record') {
+      setRecordingTimer(10);
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingTimer(prev => {
+          if (prev <= 1) {
+            if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+            handleStopRecording();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+    }
+    return () => {
+      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+    };
+  }, [isRecording, mode]);
 
   const recognitionRef = useRef<any>(null);
 
@@ -413,9 +436,11 @@ export default function Home() {
                         onClick={isRecording ? handleStopRecording : handleStartRecording}
                         className={`w-32 h-32 rounded-full flex items-center justify-center transition-all duration-500 shadow-2xl ${isRecording ? 'bg-destructive text-white scale-110 ring-8 ring-destructive/20 animate-pulse' : 'bg-primary text-white hover:bg-primary/90'}`}
                       >
-                         {isRecording ? <Square className="w-8 h-8 fill-current" /> : <Mic className="w-12 h-12" />}
+                         {isRecording ? <div className="text-2xl font-black font-display">{recordingTimer}s</div> : <Mic className="w-12 h-12" />}
                       </button>
-                      <p className="text-sm font-black text-muted-foreground uppercase tracking-widest">{isRecording ? t.tapStop : t.tapStart}</p>
+                      <p className="text-sm font-black text-muted-foreground uppercase tracking-widest">
+                        {isRecording ? `REC: ${recordingTimer}S REMAINING` : audioBlob ? 'RECORDING COMPLETE. READY FOR ANALYSIS.' : t.tapStart}
+                      </p>
                       {/* Task 4: Error Fallback */}
                       {error && (
                         <div className="flex items-center gap-2 text-destructive font-bold text-xs animate-in slide-in-from-top px-4 py-2 bg-destructive/5 rounded-lg border border-destructive/10">
