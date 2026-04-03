@@ -9,7 +9,7 @@ import {
 } from '@workspace/api-client-react';
 import { Button, Card, Input, Waveform, Badge } from '@/components/ui';
 import { useAudioRecorder } from '@/hooks/use-audio-recorder';
-import { getLifestyleRecommendations } from '@/lib/assessment-utils';
+import { getLifestyleRecommendations, calculateClinicalScore } from '@/lib/assessment-utils';
 import { saveAssessment } from '@/lib/assessment-storage';
 import { useAppStore, pickRandomWords, calculateMemoryScore } from '@/lib/store';
 import type { AnalyzeResult } from '@/lib/store';
@@ -58,6 +58,8 @@ export default function Home() {
 
   const [countdown, setCountdown] = useState(10);
   const [recordingTimer, setRecordingTimer] = useState(10);
+  const [durationSeconds, setDurationSeconds] = useState(0);
+  const startTimeRef = useRef<number | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval>|null>(null);
   const recordingTimerRef = useRef<ReturnType<typeof setInterval>|null>(null);
 
@@ -179,11 +181,16 @@ export default function Home() {
   const handleStartRecording = () => {
     setError(null);
     setTranscribedText('');
+    startTimeRef.current = Date.now();
     startRecording();
     startSpeechRecognition();
   };
 
   const handleStopRecording = () => {
+    if (startTimeRef.current) {
+      setDurationSeconds((Date.now() - startTimeRef.current) / 1000);
+      startTimeRef.current = null;
+    }
     stopRecording();
     stopSpeechRecognition();
   };
@@ -257,21 +264,28 @@ export default function Home() {
     if (!apiResult) return;
 
     const activePatientId = ensurePatientId();
-    const { score: memScore, matched } = calculateMemoryScore(challengeWords, recallInput);
-    const combinedScore = Math.round((apiResult.score * 0.6) + (memScore * 0.4));
+    const { matched } = calculateMemoryScore(challengeWords, recallInput);
+    
+    // Use the new clinical heuristic scoring for Task 1
+    const { total: combinedScore, confidence, explanation } = calculateClinicalScore(
+       matched.length,
+       challengeWords.length,
+       transcribedText || textInput, // speechText
+       durationSeconds || 5 // fallback
+    );
     
     const fullResult = {
       patientId: activePatientId,
       timestamp: new Date().toISOString(),
       apiScore: apiResult.score,
-      memoryScore: memScore,
+      memoryScore: (matched.length / challengeWords.length) * 100,
       combinedScore,
       risk: apiResult.risk,
-      observations: apiResult.observations,
+      observations: [...apiResult.observations, ...explanation],
       challengeWords,
       recalledWords: matched,
       recommendations: apiResult.recommendations.length > 0 ? apiResult.recommendations : getLifestyleRecommendations(apiResult.risk),
-      confidence: apiResult.confidence,
+      confidence,
       transcript: apiResult.transcript,
     };
 

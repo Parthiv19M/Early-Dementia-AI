@@ -20,6 +20,61 @@ export function getScoreExplanation(score: number): string {
   return 'A lower combined score suggests more noticeable difficulty in recall or speech structure during this screening session.';
 }
 
+export interface ScoreFactors {
+  memoryRecall: number;
+  speechQuality: number;
+  responseTime: number;
+  consistency: number;
+}
+
+export function calculateClinicalScore(
+  recalledCount: number,
+  totalWords: number,
+  speechText: string,
+  durationSeconds: number
+): { total: number; factors: ScoreFactors; confidence: number; explanation: string[] } {
+  // 1. Memory Score (40%)
+  const memoryScore = (recalledCount / totalWords) * 100;
+  
+  // 2. Speech Quality (30%)
+  const docWords = speechText.trim().split(/\s+/).filter(Boolean);
+  const speechQuality = Math.min(100, (docWords.length / 8) * 100); // 8+ words is good for 10s
+  
+  // 3. Response Time (15%)
+  // Ideal range: 4s to 8s
+  let timeScore = 100;
+  if (durationSeconds < 4) timeScore = 60;
+  if (durationSeconds > 8) timeScore = 80;
+  if (durationSeconds < 2) timeScore = 30;
+  
+  // 4. Consistency (15%)
+  const uniqueWords = new Set(docWords.map(w => w.toLowerCase()));
+  const repetitionRatio = docWords.length > 0 ? uniqueWords.size / docWords.length : 1;
+  const consistency = repetitionRatio * 100;
+
+  const total = Math.round(
+    (memoryScore * 0.40) +
+    (speechQuality * 0.30) +
+    (timeScore * 0.15) +
+    (consistency * 0.15)
+  );
+
+  // Confidence based on input completeness
+  let confidence = 85;
+  if (docWords.length < 3) confidence -= 30;
+  if (docWords.length > 15) confidence += 5;
+  if (recalledCount === 0) confidence -= 10;
+  confidence = Math.max(40, Math.min(98, confidence));
+
+  const explanation = [
+    `Memory recall: ${memoryScore >= 100 ? 'Excellent' : memoryScore >= 66 ? 'Good' : memoryScore >= 33 ? 'Partial' : 'Poor'} (${recalledCount}/${totalWords})`,
+    `Speech clarity: ${speechQuality >= 80 ? 'High' : speechQuality >= 50 ? 'Moderate' : 'Low'}`,
+    `Clinical confidence: ${confidence}%`
+  ];
+
+  return { total, factors: { memoryRecall: memoryScore, speechQuality, responseTime: timeScore, consistency }, confidence, explanation };
+}
+
 export function getLifestyleRecommendations(risk: RiskLevel): string[] {
   if (risk === 'High') {
     return [
@@ -62,7 +117,6 @@ export function getInsightSummary(observations: string[]): string {
     return 'The analysis suggests your speech flow and structure were largely within standard parameters for this session.';
   }
 
-  // Find the first observation that has a mapping, or use the raw one
   const firstMatch = observations.find(obs => INSIGHT_MAP[obs]);
   return firstMatch ? INSIGHT_MAP[firstMatch] : observations[0];
 }

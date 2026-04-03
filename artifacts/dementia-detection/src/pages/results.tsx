@@ -39,8 +39,12 @@ export default function Results() {
       combinedScore: 'Combined Score',
       fromAi: 'From AI analysis',
       wordsRecalled: 'words recalled',
-      averageOfBoth: 'Average of both',
+      averageOfBoth: 'Heuristic weighted average',
       scoreExplanation: 'Score Explanation',
+      calculationTitle: 'Calculation Insights',
+      memoryWeight: 'Memory (40%)',
+      speechWeight: 'Speech (30%)',
+      confidenceWeight: 'Stability (30%)',
       recallDetails: 'Memory Recall Details',
       recalled: 'Recalled',
       missed: 'Missed',
@@ -73,8 +77,12 @@ export default function Results() {
       combinedScore: 'कुल स्कोर',
       fromAi: 'एआई विश्लेषण से',
       wordsRecalled: 'शब्द याद आए',
-      averageOfBoth: 'दोनों का औसत',
+      averageOfBoth: 'यूरिस्टिक भारित औसत',
       scoreExplanation: 'स्कोर का स्पष्टीकरण',
+      calculationTitle: 'गणना अंतर्दृष्टि',
+      memoryWeight: 'स्मृति (40%)',
+      speechWeight: 'भाषण (30%)',
+      confidenceWeight: 'स्थिरता (30%)',
       recallDetails: 'स्मृति रिकॉल विवरण',
       recalled: 'याद आया',
       missed: 'छूट गया',
@@ -340,6 +348,44 @@ export default function Results() {
               <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
                 {getRiskDescription(latestResult.risk)}
               </p>
+            </div>
+          </Card>
+        </motion.div>
+
+        {/* Task 3: Calculation Explanation Section */}
+        <motion.div variants={item}>
+          <Card className="p-6 md:p-8 bg-primary/5 border-none shadow-inner rounded-3xl">
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary mb-6 flex items-center gap-2">
+              <Sparkles className="w-4 h-4" /> {t.calculationTitle}
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <div className="space-y-1">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase">{t.memoryWeight}</p>
+                <div className="flex items-center gap-2">
+                   <div className="h-1.5 flex-1 bg-secondary rounded-full overflow-hidden">
+                      <div className="h-full bg-primary" style={{ width: `${Math.min(100, (latestResult.memoryScore))}%` }} />
+                   </div>
+                   <span className="text-xs font-bold">{Math.round(latestResult.memoryScore)}</span>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase">{t.speechWeight}</p>
+                <div className="flex items-center gap-2">
+                   <div className="h-1.5 flex-1 bg-secondary rounded-full overflow-hidden">
+                      <div className="h-full bg-accent" style={{ width: `${Math.min(100, (latestResult.apiScore))}%` }} />
+                   </div>
+                   <span className="text-xs font-bold">{Math.round(latestResult.apiScore)}</span>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase">{t.confidenceWeight}</p>
+                <div className="flex items-center gap-2">
+                   <div className="h-1.5 flex-1 bg-secondary rounded-full overflow-hidden">
+                      <div className="h-full bg-success" style={{ width: `${latestResult.confidence}%` }} />
+                   </div>
+                   <span className="text-xs font-bold">{Math.round(latestResult.confidence)}%</span>
+                </div>
+              </div>
             </div>
           </Card>
         </motion.div>
