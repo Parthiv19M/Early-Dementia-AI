@@ -91,7 +91,7 @@ export default function History() {
   const latestRecord = records[0];
 
   return (
-    <div className="space-y-8 max-w-6xl mx-auto animate-in fade-in duration-500 pb-12">
+    <div className="space-y-6 max-w-6xl mx-auto animate-in fade-in duration-500 pb-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="animate-in slide-in-from-left duration-500">
           <Badge variant="outline" className="mb-2 border-primary/20 text-primary">Patient Records</Badge>

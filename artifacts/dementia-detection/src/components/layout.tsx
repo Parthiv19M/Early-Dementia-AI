@@ -50,7 +50,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 relative">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:px-8 lg:py-4 relative">
         <AnimatePresence mode="wait">
           <motion.div
             key={location}

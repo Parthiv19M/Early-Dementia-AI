@@ -96,8 +96,8 @@ export default function DoctorDashboard() {
   const trendRecords = useMemo(() => records.slice(0, 5), [records]);
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto animate-in fade-in duration-700">
-      <div className="bg-primary text-primary-foreground rounded-2xl p-8 relative overflow-hidden shadow-xl group border border-primary/20">
+    <div className="space-y-6 max-w-6xl mx-auto animate-in fade-in duration-500 pb-6">
+      <div className="bg-primary text-primary-foreground rounded-2xl p-6 relative overflow-hidden shadow-xl group border border-primary/20">
         <div className="absolute top-0 right-0 -mr-20 -mt-20 opacity-20 group-hover:scale-110 transition-transform duration-700 pointer-events-none">
           <Brain className="w-96 h-96" />
         </div>

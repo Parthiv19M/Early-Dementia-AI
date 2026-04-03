@@ -235,7 +235,7 @@ export default function Results() {
   };
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto pb-12">
+    <div className="space-y-6 max-w-4xl mx-auto pb-8">
       <div className="flex items-center justify-between">
         <div>
           <button
@@ -256,7 +256,7 @@ export default function Results() {
         </div>
       </div>
 
-      <motion.div variants={container} initial="hidden" animate="show" className="space-y-8">
+      <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
         <motion.div variants={item}>
           <Card className="relative overflow-hidden">
             <div className={`absolute inset-0 opacity-[0.03] ${riskColors.bg}`} />

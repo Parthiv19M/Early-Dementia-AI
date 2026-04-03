@@ -280,9 +280,9 @@ export default function Home() {
   const t = language === 'hi' ? translations.hi : translations.en;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[85vh] py-8">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[70vh] py-4">
       {/* Left Column — Context & Details */}
-      <div className="space-y-8 animate-in slide-in-from-left duration-700">
+      <div className="space-y-6 animate-in slide-in-from-left duration-700">
         <div>
           <Badge variant="outline" className="mb-4 py-1 px-3 border-primary/30 text-primary bg-primary/5 flex items-center gap-2 w-fit">
             <HeartPulse className="w-3.5 h-3.5" /> Clinical Proto-Type v1.2
