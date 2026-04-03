@@ -2,13 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { useLocation } from 'wouter';
 import { jsPDF } from 'jspdf';
-import { ArrowLeft, Brain, Eye, ShieldCheck, AlertTriangle, AlertOctagon, Lightbulb, CheckCircle2, XCircle, RotateCcw, Copy, Check, FileDown } from 'lucide-react';
+import { ArrowLeft, Brain, Eye, ShieldCheck, AlertTriangle, AlertOctagon, Lightbulb, CheckCircle2, XCircle, RotateCcw, Copy, Check, FileDown, ClipboardCheck, Clock, Sparkles, History, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Card, Badge, Button } from '@/components/ui';
 import { getInsightSummary, getRiskDescription, getScoreExplanation } from '@/lib/assessment-utils';
 import { useAppStore, pickRandomWords } from '@/lib/store';
 import { getAssessmentsByPatientId } from '@/lib/assessment-storage';
-import { Sparkles, History, TrendingUp } from 'lucide-react';
 
 export default function Results() {
   const [_, setLocation] = useLocation();
@@ -268,67 +267,63 @@ export default function Results() {
         <motion.div variants={item}>
           <Card className="relative overflow-hidden">
             <div className={`absolute inset-0 opacity-[0.03] ${riskColors.bg}`} />
-            <div className="relative z-10 flex flex-col items-center text-center p-6 md:p-8 gap-6">
-              <div className="flex flex-wrap items-center justify-center gap-3">
-                <div className="flex items-center gap-2">
-                   <Badge className="px-4 py-2 text-sm font-semibold">
-                    {t.patientId} {latestResult.patientId}
-                   </Badge>
-                   <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleCopyId}
-                    className="h-9 px-3 text-primary hover:bg-primary/10 gap-2 border border-primary/20"
-                  >
-                    {copied ? (
-                      <>
-                        <Check className="w-4 h-4" />
-                        <span className="text-xs font-bold">{t.copied}</span>
-                      </>
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
-                  </Button>
-                </div>
-                <span className="text-sm text-muted-foreground">
-                  {t.savedOn} {format(new Date(latestResult.timestamp), 'MMM dd, yyyy h:mm a')}
-                </span>
+            <div className="relative z-10 flex flex-col items-center text-center p-6 md:p-8 gap-1 md:gap-2">
+              <div className="flex flex-col items-center gap-2 mb-4">
+                 <div className="flex flex-wrap items-center justify-center gap-3">
+                    <Badge variant="outline" className="px-3 md:px-4 py-1.5 text-[10px] md:text-xs font-black uppercase tracking-wider bg-secondary/50 border-none">
+                     {t.patientId}: {latestResult.patientId}
+                    </Badge>
+                    <Button
+                     variant="ghost"
+                     size="sm"
+                     onClick={handleCopyId}
+                     className="h-8 w-8 p-0 text-primary hover:bg-primary/10 rounded-full border border-primary/10"
+                    >
+                     {copied ? (
+                       <CheckCircle2 className="w-4 h-4 text-success" />
+                     ) : (
+                       <ClipboardCheck className="w-4 h-4" />
+                     )}
+                    </Button>
+                 </div>
+                 <span className="text-[10px] text-muted-foreground/60 font-semibold tracking-wide flex items-center gap-1.5 justify-center">
+                    <Clock className="w-3 h-3" /> {t.savedOn} {format(new Date(latestResult.timestamp), 'MMM dd, yyyy h:mm a')}
+                 </span>
               </div>
 
-              <div className="flex flex-col items-center">
-                 <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em] mb-4">{t.cognitiveScore}</span>
-                 <div className="relative w-48 h-48 md:w-56 md:h-56 flex items-center justify-center">
+              <div className="flex flex-col items-center mb-6">
+                 <span className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.25em] mb-4">{t.cognitiveScore}</span>
+                 <div className="relative w-48 h-48 md:w-56 md:h-56 flex items-center justify-center transition-all duration-700 hover:scale-[1.02]">
                    <svg className="w-full h-full transform -rotate-90">
-                     {/* Mobile Gauge */}
-                     <circle cx="96" cy="96" r={60} className="stroke-secondary fill-none md:hidden" strokeWidth="14" />
+                     {/* Gauge Paths */}
+                     <circle cx="96" cy="96" r={radius - 8} className="stroke-secondary fill-none md:hidden" strokeWidth="12" />
                      <motion.circle
-                       cx="96" cy="96" r={60}
+                       cx="96" cy="96" r={radius - 8}
                        className={`${riskColors.stroke} fill-none md:hidden`}
-                       strokeWidth="14"
+                       strokeWidth="12"
                        strokeLinecap="round"
                        initial={{ strokeDashoffset: circumference }}
-                       animate={{ strokeDashoffset: 2 * Math.PI * 60 - (combinedScore / 100) * (2 * Math.PI * 60) }}
+                       animate={{ strokeDashoffset: 2 * Math.PI * (radius - 8) - (combinedScore / 100) * (2 * Math.PI * (radius - 8)) }}
                        transition={{ duration: 1.8, ease: "easeOut" }}
-                       strokeDasharray={2 * Math.PI * 60}
+                       strokeDasharray={2 * Math.PI * (radius - 8)}
                      />
-  
-                     {/* Desktop Gauge */}
-                     <circle cx="112" cy="112" r={radius} className="hidden md:block stroke-secondary fill-none" strokeWidth="16" />
+
+                     <circle cx="112" cy="112" r={radius} className="hidden md:block stroke-secondary fill-none" strokeWidth="14" />
                      <motion.circle
                        cx="112" cy="112" r={radius}
                        className={`${riskColors.stroke} fill-none hidden md:block`}
-                       strokeWidth="16"
+                       strokeWidth="14"
                        strokeLinecap="round"
                        initial={{ strokeDashoffset: circumference }}
                        animate={{ strokeDashoffset }}
                        transition={{ duration: 1.8, ease: "easeOut" }}
                        strokeDasharray={circumference}
-                       style={{ filter: `drop-shadow(0 0 8px ${riskColors.hex}40)` }}
+                       style={{ filter: `drop-shadow(0 0 12px ${riskColors.hex}30)` }}
                      />
                    </svg>
                    <div className="absolute flex flex-col items-center justify-center">
                      <motion.span
-                       className="text-6xl font-display font-bold text-foreground"
+                       className="text-6xl md:text-7xl font-display font-black text-foreground tracking-tighter"
                        initial={{ scale: 0.5, opacity: 0 }}
                        animate={{ scale: 1, opacity: 1 }}
                        transition={{ delay: 0.5, duration: 0.5 }}
@@ -343,9 +338,16 @@ export default function Results() {
                 <div className={`w-12 h-12 rounded-2xl ${riskColors.bg} ${riskColors.text} flex items-center justify-center`}>
                   {getRiskIcon(latestResult.risk)}
                 </div>
-                <Badge variant={getRiskVariant(latestResult.risk)} className="px-4 md:px-6 py-2 md:py-2.5 text-sm md:text-base font-bold transition-all shadow-md">
-                  {latestResult.risk} {t.riskSuffix}
-                </Badge>
+                  <Badge 
+                    variant="default"
+                    className={`px-6 py-2.5 text-xs font-black uppercase tracking-[0.2em] transition-all shadow-md border-0 ${
+                      latestResult.risk === 'High' ? 'bg-destructive text-white' : 
+                      latestResult.risk === 'Medium' ? 'bg-[#f59e0b] text-white shadow-[#f59e0b]/20 hover:bg-[#d97706]' : 
+                      'bg-success text-white shadow-success/20'
+                    }`}
+                  >
+                    {latestResult.risk} {t.riskSuffix}
+                  </Badge>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
                 {getRiskDescription(latestResult.risk)}
