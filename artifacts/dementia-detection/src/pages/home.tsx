@@ -82,48 +82,6 @@ export default function Home() {
     }
   }, [setChallengeWords]);
 
-  useEffect(() => {
-    if (step === 'memorize') {
-      setCountdown(10);
-      countdownRef.current = setInterval(() => {
-        setCountdown(prev => {
-          if (prev <= 1) {
-            if (countdownRef.current) clearInterval(countdownRef.current);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      return () => {
-        if (countdownRef.current) clearInterval(countdownRef.current);
-      };
-    }
-    return undefined;
-  }, [step, challengeWords]);
-
-  useEffect(() => {
-    if (isRecording && mode === 'record') {
-      setRecordingTimer(10);
-      recordingTimerRef.current = setInterval(() => {
-        setRecordingTimer(prev => {
-          if (prev <= 1) {
-            if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
-            handleStopRecording();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    } else {
-      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
-    }
-    return () => {
-      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
-    };
-  }, [isRecording, mode]);
-
-  const recognitionRef = useRef<any>(null);
-
   const startSpeechRecognition = useCallback(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) return;
@@ -178,34 +136,26 @@ export default function Home() {
     setIsTranscribing(false);
   }, []);
 
-  const handleStartRecording = () => {
+  const recognitionRef = useRef<any>(null);
+
+  const handleStartRecording = useCallback(() => {
     setError(null);
     setTranscribedText('');
     startTimeRef.current = Date.now();
     startRecording();
     startSpeechRecognition();
-  };
+  }, [startRecording, startSpeechRecognition]);
 
-  const handleStopRecording = () => {
+  const handleStopRecording = useCallback(() => {
     if (startTimeRef.current) {
       setDurationSeconds((Date.now() - startTimeRef.current) / 1000);
       startTimeRef.current = null;
     }
     stopRecording();
     stopSpeechRecognition();
-  };
+  }, [stopRecording, stopSpeechRecognition]);
 
-  const handleMemorized = () => {
-    if (countdownRef.current) clearInterval(countdownRef.current);
-    ensurePatientId();
-    setStep('record');
-    // Automate the transition to recording as per Task 2
-    setTimeout(() => {
-      handleStartRecording();
-    }, 300);
-  };
-
-  const handleAnalyze = async () => {
+  const handleAnalyze = useCallback(async () => {
     const activePatientId = ensurePatientId();
     
     // Explicit Stop logic to synchronize state before analysis
@@ -215,11 +165,11 @@ export default function Home() {
     }
 
     // Blob settlement wait: ensure the MediaRecorder onstop event has processed the chunks
-    // This is the most common cause for "empty blob" or stalling errors
+    // Use faster 100ms intervals to meet the 1-4s target (Task 11)
     console.log('--- CLIINICAL DEBUG: Waiting for audio blob to settle...');
     let pollCount = 0;
     while (!audioBlob && pollCount < 10 && mode === 'record') {
-       await new Promise(r => setTimeout(r, 200));
+       await new Promise(r => setTimeout(r, 100));
        pollCount++;
     }
 
@@ -236,11 +186,9 @@ export default function Home() {
 
     // Timeout safety net (Task 5)
     const analysisTimeout = setTimeout(() => {
-      if (isAnalyzing) {
-        setIsAnalyzing(false);
-        setError('Analysis taking longer than expected. Please retry.');
-        console.error('--- CLIINICAL DEBUG: Analysis Timeout after 15s');
-      }
+      setIsAnalyzing(false);
+      setError('Analysis taking longer than expected. Please retry.');
+      console.error('--- CLIINICAL DEBUG: Analysis Timeout after 15s');
     }, 15000);
 
     try {
@@ -269,8 +217,9 @@ export default function Home() {
       }
 
       console.log('--- CLIINICAL DEBUG: API Response received');
-      // Simulated 2s delay for professional processing feel (Task 9)
-      await new Promise(r => setTimeout(r, 2000));
+      // Task 11: Optimized simulated delay for professional feel AND speed
+      await new Promise(r => setTimeout(r, 800));
+      
       setApiResult(toDisplayResult(result));
       setStep('recall');
       clearTimeout(analysisTimeout);
@@ -281,6 +230,60 @@ export default function Home() {
       setIsAnalyzing(false);
       clearTimeout(analysisTimeout);
     }
+  }, [audioBlob, mode, transcribedText, textInput, language, isRecording, ensurePatientId, handleStopRecording]);
+
+  useEffect(() => {
+    if (step === 'memorize') {
+      setCountdown(10);
+      countdownRef.current = setInterval(() => {
+        setCountdown(prev => {
+          if (prev <= 1) {
+            if (countdownRef.current) clearInterval(countdownRef.current);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => {
+        if (countdownRef.current) clearInterval(countdownRef.current);
+      };
+    }
+    return undefined;
+  }, [step]);
+
+  useEffect(() => {
+    if (isRecording && mode === 'record') {
+      setRecordingTimer(10);
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingTimer(prev => {
+          if (prev <= 1) {
+            if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+            handleStopRecording();
+            // Automatically analyze after recorded segment
+            setTimeout(() => {
+              handleAnalyze();
+            }, 500);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+    }
+    return () => {
+      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+    };
+  }, [isRecording, mode, handleStopRecording, handleAnalyze]);
+
+  const handleMemorized = () => {
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    ensurePatientId();
+    setStep('record');
+    // Automate the transition to recording as per Task 2
+    setTimeout(() => {
+      handleStartRecording();
+    }, 300);
   };
 
   const handleRecallSubmit = () => {
