@@ -15,7 +15,7 @@ import { useAppStore, pickRandomWords, calculateMemoryScore, type RiskLevel } fr
 import type { AnalyzeResult } from '@/lib/store';
 import { motion, AnimatePresence } from 'framer-motion';
 
-type Step = 'memorize' | 'record' | 'recall';
+type Step = 'memorize' | 'record';
 
 function mapRiskLevel(riskLevel: ApiAnalysisResult['riskLevel']): AnalyzeResult['risk'] {
   if (riskLevel === 'High Risk') return 'High';
@@ -53,15 +53,16 @@ export default function Home() {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [recallInput, setRecallInput] = useState('');
   const [apiResult, setApiResult] = useState<AnalyzeResult | null>(null);
 
   const [countdown, setCountdown] = useState(10);
   const [recordingTimer, setRecordingTimer] = useState(10);
   const [durationSeconds, setDurationSeconds] = useState(0);
+  
   const startTimeRef = useRef<number | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval>|null>(null);
   const recordingTimerRef = useRef<ReturnType<typeof setInterval>|null>(null);
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     const sampleStr = sessionStorage.getItem('synapta_sample');
@@ -69,13 +70,12 @@ export default function Home() {
       try {
         const sample = JSON.parse(sampleStr);
         setTextInput(sample.text);
-        setRecallInput(sample.recalled);
         setMode('text');
         setStep('record');
-        if (sample.recalled.includes(',')) {
+        if (sample.recalled && sample.recalled.includes(',')) {
           setChallengeWords(['Drum', 'Trumpet', 'Silver']);
         }
-        sessionStorage.removeItem('cogno_sample');
+        sessionStorage.removeItem('synapta_sample');
       } catch (e) {
         console.error('Failed to parse sample data', e);
       }
@@ -136,8 +136,6 @@ export default function Home() {
     setIsTranscribing(false);
   }, []);
 
-  const recognitionRef = useRef<any>(null);
-
   const handleStartRecording = useCallback(() => {
     setError(null);
     setTranscribedText('');
@@ -158,14 +156,10 @@ export default function Home() {
   const handleAnalyze = useCallback(async () => {
     const activePatientId = ensurePatientId();
     
-    // Explicit Stop logic to synchronize state before analysis
     if (isRecording) {
-      console.log('--- CLIINICAL DEBUG: Stop recording before analysis');
       handleStopRecording();
     }
 
-    // Blob settlement wait: ensure the MediaRecorder onstop event has processed the chunks
-    // Use faster 100ms intervals to meet the 1-4s target (Task 11)
     console.log('--- CLIINICAL DEBUG: Waiting for audio blob to settle...');
     let pollCount = 0;
     while (!audioBlob && pollCount < 10 && mode === 'record') {
@@ -174,7 +168,6 @@ export default function Home() {
     }
 
     const userSpeechText = mode === 'record' ? transcribedText.trim() : textInput.trim();
-    console.log('--- CLIINICAL DEBUG: Input detected', { mode, hasBlob: !!audioBlob, textLen: userSpeechText.length });
 
     if (mode === 'record' && !audioBlob && !userSpeechText) {
       setError('Recording failed or empty input. Please try again.');
@@ -184,31 +177,19 @@ export default function Home() {
     setIsAnalyzing(true);
     setError(null);
 
-    // Timeout safety net (Task 5)
     const analysisTimeout = setTimeout(() => {
       setIsAnalyzing(false);
       setError('Analysis taking longer than expected. Please retry.');
-      console.error('--- CLIINICAL DEBUG: Analysis Timeout after 15s');
     }, 15000);
 
     try {
       let result: ApiAnalysisResult;
-      console.log('--- CLIINICAL DEBUG: Sending API Request...');
-
       if (mode === 'record' && audioBlob) {
         try {
-          const file = new File([audioBlob], 'speech-input.webm', { 
-            type: audioBlob.type || 'audio/webm' 
-          });
-          result = await transcribeAudio({
-            audio: file,
-            language: language as any,
-            userId: activePatientId,
-          });
-          console.log('--- CLIINICAL DEBUG: Transcription successful');
+          const file = new File([audioBlob], 'speech-input.webm', { type: audioBlob.type || 'audio/webm' });
+          result = await transcribeAudio({ audio: file, language: language as any, userId: activePatientId });
           setTranscribedText(result.transcript);
         } catch (transcribeError) {
-          console.warn('--- CLIINICAL DEBUG: Direct transcription failed, falling back to local transcript', transcribeError);
           if (!userSpeechText) throw transcribeError;
           result = await analyzeText({ text: userSpeechText, language: language as any, userId: activePatientId });
         }
@@ -216,12 +197,38 @@ export default function Home() {
         result = await analyzeText({ text: userSpeechText || '', language: language as any, userId: activePatientId });
       }
 
-      console.log('--- CLIINICAL DEBUG: API Response received');
-      // Task 11: Optimized simulated delay for professional feel AND speed
-      await new Promise(r => setTimeout(r, 800));
+      await new Promise(r => setTimeout(r, 1500));
       
-      setApiResult(toDisplayResult(result));
-      setStep('recall');
+      // Calculate final results automatically
+      const displayResult = toDisplayResult(result);
+      const finalSpeechText = result.transcript || userSpeechText;
+      const { matched } = calculateMemoryScore(challengeWords, finalSpeechText);
+      
+      const { total: combinedScore, confidence, explanation, dynamicObservations } = calculateClinicalScore(
+         matched.length,
+         challengeWords.length,
+         finalSpeechText,
+         durationSeconds || 10
+      );
+      
+      const fullResult = {
+        patientId: activePatientId,
+        timestamp: new Date().toISOString(),
+        apiScore: displayResult.score,
+        memoryScore: (matched.length / challengeWords.length) * 100,
+        combinedScore,
+        risk: (combinedScore < 50 ? 'High' : combinedScore < 75 ? 'Medium' : 'Low') as RiskLevel,
+        observations: dynamicObservations,
+        challengeWords,
+        recalledWords: matched,
+        recommendations: getLifestyleRecommendations(combinedScore),
+        confidence,
+        transcript: explanation,
+      };
+
+      saveAssessment(fullResult);
+      setLatestResult(fullResult);
+      setLocation('/results');
       clearTimeout(analysisTimeout);
     } catch (err: any) {
       console.error('--- CLIINICAL DEBUG: Analysis Error:', err);
@@ -230,7 +237,7 @@ export default function Home() {
       setIsAnalyzing(false);
       clearTimeout(analysisTimeout);
     }
-  }, [audioBlob, mode, transcribedText, textInput, language, isRecording, ensurePatientId, handleStopRecording]);
+  }, [audioBlob, mode, transcribedText, textInput, language, isRecording, ensurePatientId, handleStopRecording, challengeWords, durationSeconds, setLatestResult, setLocation]);
 
   useEffect(() => {
     if (step === 'memorize') {
@@ -259,7 +266,6 @@ export default function Home() {
           if (prev <= 1) {
             if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
             handleStopRecording();
-            // Automatically analyze after recorded segment
             setTimeout(() => {
               handleAnalyze();
             }, 500);
@@ -280,44 +286,9 @@ export default function Home() {
     if (countdownRef.current) clearInterval(countdownRef.current);
     ensurePatientId();
     setStep('record');
-    // Automate the transition to recording as per Task 2
     setTimeout(() => {
       handleStartRecording();
-    }, 300);
-  };
-
-  const handleRecallSubmit = () => {
-    if (!apiResult) return;
-
-    const activePatientId = ensurePatientId();
-    const { matched } = calculateMemoryScore(challengeWords, recallInput);
-    
-    // Use the new clinical heuristic scoring for Task 1
-    const { total: combinedScore, confidence, explanation, dynamicObservations } = calculateClinicalScore(
-       matched.length,
-       challengeWords.length,
-       transcribedText || textInput, // speechText
-       durationSeconds || 5 // fallback
-    );
-    
-    const fullResult = {
-      patientId: activePatientId,
-      timestamp: new Date().toISOString(),
-      apiScore: apiResult.score,
-      memoryScore: (matched.length / challengeWords.length) * 100,
-      combinedScore,
-      risk: (combinedScore < 50 ? 'High' : combinedScore < 75 ? 'Medium' : 'Low') as RiskLevel,
-      observations: dynamicObservations,
-      challengeWords,
-      recalledWords: matched,
-      recommendations: getLifestyleRecommendations(combinedScore),
-      confidence,
-      transcript: explanation, // Store the explanation here as it's more human-readable
-    };
-
-    saveAssessment(fullResult);
-    setLatestResult(fullResult);
-    setLocation('/results');
+    }, 500);
   };
 
   const translations = {
@@ -367,11 +338,10 @@ export default function Home() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center py-4">
-      {/* Left Column — Context & Details */}
       <div className="space-y-6 animate-in slide-in-from-left duration-700">
         <div>
           <Badge variant="outline" className="mb-4 py-1 px-3 border-primary/30 text-primary bg-primary/5 flex items-center gap-2 w-fit">
-            <HeartPulse className="w-3.5 h-3.5" /> Clinical Proto-Type v1.2
+            <HeartPulse className="w-3.5 h-3.5" /> Clinical Proto-Type v1.4
           </Badge>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-extrabold leading-tight tracking-tight text-foreground">
             {t.heroTitle} <br />
@@ -406,10 +376,8 @@ export default function Home() {
               </div>
            </div>
         </Card>
-
       </div>
 
-      {/* Right Column — Interactive Assessment Protocol */}
       <div className="relative">
         <div className="absolute -inset-10 bg-primary/5 blur-[120px] -z-10 rounded-full" />
         
@@ -425,7 +393,7 @@ export default function Home() {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 1.05 }}
-                  className="flex flex-col items-center gap-6 min-h-[320px] justify-center"
+                  className="flex flex-col items-center gap-6 min-h-[360px] justify-center"
                 >
                   <div className="text-center space-y-2">
                      <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">{t.medicalCard}</h3>
@@ -460,80 +428,74 @@ export default function Home() {
                   key="record"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="flex flex-col items-center gap-4 min-h-[320px] justify-center"
+                  className="flex flex-col items-center gap-4 min-h-[360px] justify-center"
                 >
-                  <div className="flex gap-2 p-1 bg-secondary rounded-xl">
-                    <button onClick={() => setMode('record')} className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${mode === 'record' ? 'bg-white text-primary shadow-sm' : 'text-muted-foreground'}`}>{t.audioBtn}</button>
-                    <button onClick={() => setMode('text')} className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${mode === 'text' ? 'bg-white text-primary shadow-sm' : 'text-muted-foreground'}`}>{t.textBtn}</button>
-                  </div>
-
-                  {mode === 'record' ? (
-                    <div className="flex flex-col items-center gap-4 w-full">
-                      <div className="h-10 w-full flex items-center justify-center">
-                        <Waveform isActive={isRecording} />
-                      </div>
-                      <button 
-                        onClick={isRecording ? handleStopRecording : handleStartRecording}
-                        className={`w-32 h-32 rounded-full flex items-center justify-center transition-all duration-500 shadow-2xl ${isRecording ? 'bg-destructive text-white scale-110 ring-8 ring-destructive/20 animate-pulse' : 'bg-primary text-white hover:bg-primary/90'}`}
-                      >
-                         {isRecording ? <div className="text-2xl font-black font-display">{recordingTimer}s</div> : <Mic className="w-12 h-12" />}
-                      </button>
-                      <p className="text-sm font-black text-muted-foreground uppercase tracking-widest">
-                        {isRecording ? `REC: ${recordingTimer}S REMAINING` : audioBlob ? 'RECORDING COMPLETE. READY FOR ANALYSIS.' : t.tapStart}
-                      </p>
-                      {/* Task 4: Error Fallback */}
-                      {error && (
-                        <div className="flex items-center gap-2 text-destructive font-bold text-xs animate-in slide-in-from-top px-4 py-2 bg-destructive/5 rounded-lg border border-destructive/10">
-                          <ShieldAlert className="w-4 h-4" /> {error}
-                        </div>
-                      )}
+                  {isAnalyzing ? (
+                    <div className="flex flex-col items-center gap-6 animate-pulse">
+                       <div className="w-20 h-20 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+                       <div className="text-center space-y-2">
+                          <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Diagnostic Neural Engine</h3>
+                          <p className="text-xl font-display font-bold text-foreground">Analyzing Biomarkers...</p>
+                       </div>
                     </div>
                   ) : (
-                    <textarea 
-                      className="w-full h-40 p-4 rounded-2xl bg-secondary focus:bg-white border-2 border-transparent focus:border-primary/20 transition-all text-sm font-medium outline-none"
-                      placeholder="Input clinical observations here..."
-                      value={textInput}
-                      onChange={(e) => setTextInput(e.target.value)}
-                    />
+                    <div className="flex flex-col items-center gap-6 w-full">
+                       <div className="flex flex-col items-center gap-2 text-center mb-2">
+                          <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Active Task</h3>
+                          <h4 className="text-xl font-display font-bold">Verbal Memory Recall</h4>
+                          <p className="text-xs text-muted-foreground font-medium max-w-[240px]">
+                             Please recite the words you just memorized into the microphone.
+                          </p>
+                       </div>
+
+                       <div className="relative w-40 h-40 flex items-center justify-center">
+                          {isRecording && (
+                            <motion.div 
+                              initial={{ scale: 0.8, opacity: 0 }}
+                              animate={{ scale: 1.2, opacity: 0.15 }}
+                              transition={{ repeat: Infinity, duration: 1.5, ease: "easeOut" }}
+                              className="absolute inset-0 bg-primary rounded-full"
+                            />
+                          )}
+                          
+                          <button 
+                            onClick={isRecording ? handleStopRecording : handleStartRecording}
+                            className={`z-10 w-32 h-32 rounded-full flex flex-col items-center justify-center transition-all duration-500 shadow-2xl relative ${isRecording ? 'bg-destructive text-white scale-110' : 'bg-primary text-white hover:bg-primary/90'}`}
+                          >
+                             {isRecording ? (
+                               <div className="flex flex-col items-center">
+                                 <span className="text-4xl font-black font-display leading-none">{recordingTimer}s</span>
+                                 <span className="text-[9px] font-black uppercase tracking-widest mt-1">Remaining</span>
+                               </div>
+                             ) : (
+                               <div className="flex flex-col items-center">
+                                 <Mic className="w-10 h-10 mb-1" />
+                                 <span className="text-[9px] font-black uppercase tracking-widest">Manual Start</span>
+                               </div>
+                             )}
+                          </button>
+                       </div>
+
+                       <div className="flex flex-col items-center gap-3">
+                          <Waveform isActive={isRecording} />
+                          <p className={`text-[10px] font-black uppercase tracking-widest transition-colors ${isRecording ? 'text-destructive animate-pulse' : 'text-muted-foreground'}`}>
+                            {isRecording ? "STABILITY: MONITORING SPEECH" : "SYSTEM READY FOR INPUT"}
+                          </p>
+                       </div>
+
+                       {error && (
+                         <div className="flex items-center gap-2 text-destructive font-black text-[10px] uppercase tracking-tighter bg-destructive/5 px-4 py-2 border border-destructive/10 rounded-full">
+                           <ShieldAlert className="w-3.5 h-3.5" /> {error}
+                         </div>
+                       )}
+                    </div>
                   )}
-
-                  <Button onClick={handleAnalyze} disabled={isAnalyzing} className="w-full py-7 text-lg font-bold tracking-tight">
-                    {isAnalyzing ? 'Processing Patterns...' : t.analyzeBtn}
-                  </Button>
-                </motion.div>
-              )}
-
-              {step === 'recall' && (
-                <motion.div 
-                   key="recall"
-                   initial={{ opacity: 0, scale: 1.1 }}
-                   animate={{ opacity: 1, scale: 1 }}
-                   className="flex flex-col items-center gap-6 min-h-[320px] justify-center"
-                >
-                   <div className="text-center space-y-2">
-                     <Info className="w-10 h-10 text-primary mx-auto mb-4" />
-                     <h2 className="text-2xl font-display font-bold">{t.recallTitle}</h2>
-                     <p className="text-sm text-muted-foreground max-w-xs mx-auto">{t.recallHelp}</p>
-                   </div>
-
-                   <Input 
-                      className="text-center text-2xl font-display font-black py-8 bg-secondary border-none"
-                      placeholder="..."
-                      value={recallInput}
-                      onChange={(e) => setRecallInput(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleRecallSubmit()}
-                   />
-
-                   <Button onClick={handleRecallSubmit} size="lg" className="px-12 py-7 font-bold">
-                      {t.seeResults}
-                   </Button>
                 </motion.div>
               )}
            </AnimatePresence>
         </Card>
 
-        {/* Repositioned Notices Section (Task 1) */}
-        <div className="mt-6 space-y-4 animate-in fade-in duration-1000 delay-500">
+        <div className="mt-8 space-y-4 animate-in fade-in duration-1000 delay-500">
            <div className="bg-amber-50/50 backdrop-blur-sm border border-amber-100 rounded-2xl p-4 flex gap-3 shadow-sm">
               <ShieldAlert className="w-5 h-5 text-amber-600/70 shrink-0 mt-0.5" />
               <p className="text-[11px] leading-relaxed text-amber-900/80 font-medium">
