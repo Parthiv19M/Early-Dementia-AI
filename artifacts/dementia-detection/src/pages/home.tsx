@@ -124,9 +124,10 @@ export default function Home() {
 
     recognition.onerror = (event: any) => {
       console.error('Speech recognition error:', event.error);
-      if (event.error !== 'aborted') {
-        setError(`Speech recognition error: ${event.error}`);
+      if (event.error === 'not-allowed') {
+        setError('Microphone permission denied.');
       }
+      setIsTranscribing(false);
     };
 
     recognition.onend = () => {
@@ -134,10 +135,14 @@ export default function Home() {
     };
 
     recognitionRef.current = recognition;
-    recognition.start();
-    setIsTranscribing(true);
-    setTranscribedText('');
-    setError(null);
+    try {
+      recognition.start();
+      setIsTranscribing(true);
+      setTranscribedText('');
+      setError(null);
+    } catch (e) {
+      console.error('Failed to start recognition:', e);
+    }
   }, [language]);
 
   const stopSpeechRecognition = useCallback(() => {
@@ -168,6 +173,15 @@ export default function Home() {
 
   const handleAnalyze = async () => {
     const activePatientId = ensurePatientId();
+    
+    // Ensure we give enough time for the recorder state to settle
+    let effectiveAudioBlob = audioBlob;
+    if (!effectiveAudioBlob && isRecording) {
+      handleStopRecording();
+      // Brief wait for Blob creation
+      await new Promise(r => setTimeout(r, 500));
+    }
+
     const userSpeechText = mode === 'record' ? transcribedText.trim() : textInput.trim();
 
     if (mode === 'record' && !audioBlob && !userSpeechText) {
@@ -181,15 +195,20 @@ export default function Home() {
     try {
       let result: ApiAnalysisResult;
 
+      // Prioritize the raw audio if available for better clinical results
       if (mode === 'record' && audioBlob) {
         try {
+          const file = new File([audioBlob], 'speech-input.webm', { 
+            type: audioBlob.type || 'audio/webm' 
+          });
           result = await transcribeAudio({
-            audio: new File([audioBlob], 'speech-input.webm', { type: audioBlob.type || 'audio/webm' }),
+            audio: file,
             language: language as any,
             userId: activePatientId,
           });
           setTranscribedText(result.transcript);
         } catch (transcribeError) {
+          console.warn('Direct transcription failed, falling back to local transcript', transcribeError);
           if (!userSpeechText) throw transcribeError;
           result = await analyzeText({ text: userSpeechText, language: language as any, userId: activePatientId });
         }
@@ -201,7 +220,7 @@ export default function Home() {
       setStep('recall');
     } catch (err: any) {
       console.error('Analysis failed:', err);
-      setError('Analysis failed. Please check your connection and try again.');
+      setError('Analysis failed. Please check your mic connection and try again.');
     } finally {
       setIsAnalyzing(false);
     }

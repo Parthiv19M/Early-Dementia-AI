@@ -236,22 +236,22 @@ export default function Results() {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto pb-8">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div className="animate-in slide-in-from-left duration-500">
           <button
             onClick={handleNewTest}
             className="flex items-center text-muted-foreground hover:text-primary transition-colors text-sm font-semibold mb-2"
           >
             <ArrowLeft className="w-4 h-4 mr-1" /> {t.newAnalysis}
           </button>
-          <h1 className="text-3xl font-display font-bold">{t.resultsTitle}</h1>
+          <h1 className="text-3xl font-display font-bold text-foreground">{t.resultsTitle}</h1>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={handleDownloadPdf} disabled={isGenerating} className="gap-2 transition-all hover:scale-105 shadow-sm border-primary/20">
-            <FileDown className="w-4 h-4" /> {isGenerating ? '...' : t.downloadReport}
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Button variant="outline" onClick={handleDownloadPdf} disabled={isGenerating} className="flex-1 sm:flex-none gap-2 py-6 sm:py-2 text-sm font-bold shadow-sm border-primary/20 hover:bg-primary/5 transition-all">
+            <FileDown className="w-4 h-4" /> <span className="sm:inline">{t.downloadReport}</span>
           </Button>
-          <Button variant="outline" onClick={handleNewTest} className="gap-2 transition-all hover:scale-105 active:scale-95 shadow-sm">
-            <RotateCcw className="w-4 h-4" /> {t.startOver}
+          <Button variant="outline" onClick={handleNewTest} className="flex-1 sm:flex-none gap-2 py-6 sm:py-2 text-sm font-bold shadow-sm hover:bg-secondary/80 transition-all active:scale-95">
+            <RotateCcw className="w-4 h-4" /> <span className="sm:inline">{t.startOver}</span>
           </Button>
         </div>
       </div>
@@ -289,11 +289,24 @@ export default function Results() {
 
               <div className="relative w-48 h-48 md:w-56 md:h-56 flex items-center justify-center">
                 <svg className="w-full h-full transform -rotate-90">
+                  {/* Mobile Gauge */}
                   <circle cx="96" cy="96" r={60} className="stroke-secondary fill-none md:hidden" strokeWidth="14" />
+                  <motion.circle
+                    cx="96" cy="96" r={60}
+                    className={`${riskColors.stroke} fill-none md:hidden`}
+                    strokeWidth="14"
+                    strokeLinecap="round"
+                    initial={{ strokeDashoffset: circumference }}
+                    animate={{ strokeDashoffset: 2 * Math.PI * 60 - (combinedScore / 100) * (2 * Math.PI * 60) }}
+                    transition={{ duration: 1.8, ease: "easeOut" }}
+                    strokeDasharray={2 * Math.PI * 60}
+                  />
+
+                  {/* Desktop Gauge */}
                   <circle cx="112" cy="112" r={radius} className="hidden md:block stroke-secondary fill-none" strokeWidth="16" />
                   <motion.circle
                     cx="112" cy="112" r={radius}
-                    className={`${riskColors.stroke} fill-none`}
+                    className={`${riskColors.stroke} fill-none hidden md:block`}
                     strokeWidth="16"
                     strokeLinecap="round"
                     initial={{ strokeDashoffset: circumference }}
@@ -320,8 +333,8 @@ export default function Results() {
                 <div className={`w-12 h-12 rounded-2xl ${riskColors.bg} ${riskColors.text} flex items-center justify-center`}>
                   {getRiskIcon(latestResult.risk)}
                 </div>
-                <Badge variant={getRiskVariant(latestResult.risk)} className="px-6 py-2.5 text-base font-bold">
-                  ⚠️ {latestResult.risk} {t.riskSuffix}
+                <Badge variant={getRiskVariant(latestResult.risk)} className="px-4 md:px-6 py-2 md:py-2.5 text-sm md:text-base font-bold transition-all shadow-md">
+                  {latestResult.risk} {t.riskSuffix}
                 </Badge>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
