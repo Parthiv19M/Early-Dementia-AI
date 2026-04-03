@@ -1,4 +1,4 @@
-# 🧠 CognoCare — AI-Based Early Dementia Detection System
+# 🧠 Synapta — AI-Based Early Dementia Detection System
 
 > AI-powered cognitive screening platform using speech, memory, and behavioral analysis for early dementia risk assessment.
 
@@ -62,7 +62,7 @@ Currently uses local storage for rapid prototyping; designed to scale with Postg
 
 ## 💡 Solution
 
-CognoCare delivers a **multi-modal cognitive assessment system**:
+Synapta delivers a **multi-modal cognitive assessment system**:
 
 ### 🧩 Modules
 

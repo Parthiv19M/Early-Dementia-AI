@@ -17,23 +17,23 @@ export default function Chatbot() {
   const [language, setLanguage] = useState<AssistantLanguage>("en");
   const translations = {
     en: {
-      header: "CognoCare",
+      header: "Synapta",
       subheader: "Local cognitive health assistant with instant guidance",
       helpText:
         "Ask about dementia explanation, memory improvement, lifestyle habits, or general cognitive health.",
       placeholder: "Ask about brain health, memory tips...",
       initialMessage:
-        "Hello! I am CognoCare Assistant. I can explain dementia, share memory improvement tips, suggest healthy routines, and guide you on cognitive wellness. How can I help you today?",
+        "Hello! I am Synapta Assistant. I can explain dementia, share memory improvement tips, suggest healthy routines, and guide you on cognitive wellness. How can I help you today?",
     },
     hi: {
-      header: "कोज्नो केयर",
+      header: "सिनेपटा",
       subheader:
         "त्वरित मार्गदर्शन के साथ स्थानीय संज्ञानात्मक स्वास्थ्य सहायक",
       helpText:
         "डिमेंशिया, स्मृति सुधार, जीवनशैली की आदतों या सामान्य संज्ञानात्मक स्वास्थ्य के बारे में पूछें।",
       placeholder: "मस्तिष्क स्वास्थ्य, स्मृति युक्तियों के बारे में पूछें...",
       initialMessage:
-        "नमस्ते! मैं कोज्नो-केयर सहायक हूँ। मैं डिमेंशिया को समझा सकता हूँ, स्मृति सुधार के सुझाव साझा कर सकता हूँ, स्वस्थ दिनचर्या का सुझाव दे सकता हूँ और संज्ञानात्मक कल्याण पर आपका मार्गदर्शन कर सकता हूँ। मैं आज आपकी क्या मदद कर सकता हूँ?",
+        "नमस्ते! मैं सिनेपटा सहायक हूँ। मैं डिमेंशिया को समझा सकता हूँ, स्मृति सुधार के सुझाव साझा कर सकता हूँ, स्वस्थ दिनचर्या का सुझाव दे सकता हूँ और संज्ञानात्मक कल्याण पर आपका मार्गदर्शन कर सकता हूँ। मैं आज आपकी क्या मदद कर सकता हूँ?",
     },
   };
 
@@ -88,7 +88,7 @@ export default function Chatbot() {
           <div className="w-12 h-12 rounded-2xl bg-white shadow-lg shadow-black/5 flex items-center justify-center p-1 overflow-hidden border border-border">
             <img
               src={`${import.meta.env.BASE_URL}images/chatbot-avatar.png`}
-              alt="CognoCare Assistant"
+              alt="Synapta Assistant"
               className="w-full h-full object-cover rounded-xl"
             />
           </div>

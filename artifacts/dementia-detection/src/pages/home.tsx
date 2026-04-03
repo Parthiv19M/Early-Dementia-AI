@@ -60,7 +60,7 @@ export default function Home() {
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    const sampleStr = sessionStorage.getItem('cogno_sample');
+    const sampleStr = sessionStorage.getItem('synapta_sample');
     if (sampleStr) {
       try {
         const sample = JSON.parse(sampleStr);
@@ -241,7 +241,7 @@ export default function Home() {
       description: 'Instant, evidence-based cognitive screening using speech biomarkers and associative memory patterns. Designed for early detection and historical trend monitoring.',
       patientPlaceholder: 'Patient ID (Auto-generated if empty)',
       memoryTitle: 'Cognitive Memory Task',
-      memoryHelp: 'Please memorize these 3 clinical markers. You will be asked to recall them following the linguistic assessment.',
+      memoryHelp: 'Please memorize these words. You will be asked to recall them shortly.',
       memorizedBtn: 'Confirm Memorization',
       audioBtn: 'Audio Input',
       textBtn: 'Text Input',
@@ -261,7 +261,7 @@ export default function Home() {
       description: 'भाषण बायोमार्कर और स्मृति पैटर्न का उपयोग करके तत्काल संज्ञानात्मक जांच। यह प्रणाली प्रारंभिक जोखिम मूल्यांकन और दीर्घकालिक निगरानी के लिए तैयार की गई है।',
       patientPlaceholder: 'रोगी आईडी (स्वचालित रूप से उत्पन्न)',
       memoryTitle: 'संज्ञानात्मक स्मृति कार्य',
-      memoryHelp: 'कृपया इन 3 शब्दों को याद करें। भाषाई मूल्यांकन के बाद आपसे इनके बारे में पूछा जाएगा।',
+      memoryHelp: 'कृपया इन शब्दों को याद करें। आपसे जल्द ही इनके बारे में पूछा जाएगा।',
       memorizedBtn: 'मैंने याद कर लिया',
       audioBtn: 'ऑडियो इनपुट',
       textBtn: 'टेक्स्ट इनपुट',
@@ -359,6 +359,10 @@ export default function Home() {
                      <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">{t.medicalCard}</h3>
                      <h2 className="text-2xl font-display font-bold text-foreground">{t.memoryTitle}</h2>
                   </div>
+
+                  <p className="text-sm font-medium text-muted-foreground text-center max-w-sm -mt-4">
+                    {t.memoryHelp}
+                  </p>
 
                    <div className="flex flex-row items-center justify-center gap-3 w-full overflow-x-auto pb-2">
                     {challengeWords.map((word, i) => (

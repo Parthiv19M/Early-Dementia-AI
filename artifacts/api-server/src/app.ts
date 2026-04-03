@@ -12,7 +12,7 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
 app.get("/", (req, res) => {
-  res.send("CognoCare API is running 🚀");
+  res.send("Synapta API is running 🚀");
 });
 
 app.use("/api", router);

@@ -103,7 +103,7 @@ export default function Results() {
       
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(22);
-      doc.text("CognoCare Assessment Report", 20, 25);
+      doc.text("Synapta Assessment Report", 20, 25);
       
       // Content
       doc.setTextColor(33, 33, 33);
@@ -147,10 +147,10 @@ export default function Results() {
       // Footer
       doc.setFontSize(8);
       doc.setTextColor(150, 150, 150);
-      const footerText = "CognoCare — AI-Based Early Dementia Screening Platform. This is not a clinical diagnosis.";
+      const footerText = "Synapta — AI-Based Early Dementia Screening Platform. This is not a clinical diagnosis.";
       doc.text(footerText, 20, 280);
       
-      doc.save(`CognoCare_Report_${latestResult.patientId}.pdf`);
+      doc.save(`Synapta_Report_${latestResult.patientId}.pdf`);
     } catch (err) {
       console.error("PDF Export failed:", err);
     } finally {

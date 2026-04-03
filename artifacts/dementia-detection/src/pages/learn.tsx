@@ -30,12 +30,35 @@ export default function Learn() {
       moderate: { text: "Is today Monday? I’m not sure… I wanted to find my... the thing you use for writing.", recalled: "" }
     };
     
-    sessionStorage.setItem('cogno_sample', JSON.stringify(samples[type]));
+    sessionStorage.setItem('synapta_sample', JSON.stringify(samples[type]));
     setLocation('/');
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-16 pb-20 px-4 sm:px-6">
+    <div className="max-w-4xl mx-auto space-y-16 pb-20 px-4 sm:px-6 mt-8">
+      {/* SECTION 0 — WHAT IS SYNAPTA? */}
+      <motion.section 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Card className="p-8 border-l-4 border-l-primary shadow-xl bg-white relative overflow-hidden group">
+          <div className="relative z-10 space-y-4">
+            <h2 className="text-3xl font-display font-bold text-foreground tracking-tight">What is <span className="text-primary">Synapta</span>?</h2>
+            <div className="text-lg text-muted-foreground leading-relaxed space-y-4">
+              <p>
+                <strong>Synapta</strong> is an AI-powered cognitive screening platform designed to detect early signs of memory and speech-related decline.
+              </p>
+              <p>
+                The name "Synapta" is inspired by the word <strong>synapse</strong> — the connections between brain cells that enable memory, thinking, and communication.
+              </p>
+              <p>
+                By analyzing how users speak, recall information, and respond to tasks, <strong>Synapta</strong> helps identify subtle cognitive changes at an early stage.
+              </p>
+            </div>
+          </div>
+        </Card>
+      </motion.section>
       {/* SECTION 1 — WHAT IS DEMENTIA */}
       <motion.section 
         initial={{ opacity: 0, y: 20 }}
@@ -79,7 +102,7 @@ export default function Learn() {
         </Card>
       </motion.section>
 
-      {/* SECTION 2 — HOW COGNOCARE HELPS */}
+      {/* SECTION 2 — HOW SYNAPTA HELPS */}
       <motion.section 
         variants={container}
         initial="hidden"
@@ -88,9 +111,9 @@ export default function Learn() {
         className="space-y-8"
       >
         <div className="text-center space-y-3">
-          <h2 className="text-3xl font-display font-bold">How CognoCare Helps</h2>
+          <h2 className="text-3xl font-display font-bold">How Synapta Helps</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            CognoCare helps detect early signs by analyzing key cognitive biomarkers that doctors also use in clinical screening.
+            Synapta helps detect early signs by analyzing key cognitive biomarkers that doctors also use in clinical screening.
           </p>
         </div>
 

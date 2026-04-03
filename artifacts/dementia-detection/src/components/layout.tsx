@@ -23,7 +23,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <Brain className="w-6 h-6 text-primary" />
             </div>
             <span className="font-display font-bold text-2xl tracking-tight text-foreground">
-              Cogno<span className="text-primary">Care</span>
+              Syn<span className="text-primary">apta</span>
             </span>
           </Link>
           

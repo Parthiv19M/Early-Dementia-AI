@@ -1,6 +1,6 @@
 import type { FullResult } from './store';
 
-const STORAGE_KEY = 'cognocare-assessments';
+const STORAGE_KEY = 'synapta-assessments';
 
 export interface AssessmentRecord extends FullResult {
   id: string;
