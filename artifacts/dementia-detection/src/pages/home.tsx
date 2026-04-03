@@ -43,7 +43,7 @@ export default function Home() {
     setLatestResult,
     challengeWords, setChallengeWords,
   } = useAppStore();
-  const { isRecording, startRecording, stopRecording, audioBlob } = useAudioRecorder();
+  const { isRecording, startRecording, stopRecording, audioBlob, setAudioBlob } = useAudioRecorder();
 
   const [step, setStep] = useState<Step>('memorize');
   const [mode, setMode] = useState<'record' | 'text'>('record');
@@ -64,23 +64,14 @@ export default function Home() {
   const recordingTimerRef = useRef<ReturnType<typeof setInterval>|null>(null);
   const recognitionRef = useRef<any>(null);
 
+  // Initialize fresh session
   useEffect(() => {
-    const sampleStr = sessionStorage.getItem('synapta_sample');
-    if (sampleStr) {
-      try {
-        const sample = JSON.parse(sampleStr);
-        setTextInput(sample.text);
-        setMode('text');
-        setStep('record');
-        if (sample.recalled && sample.recalled.includes(',')) {
-          setChallengeWords(['Drum', 'Trumpet', 'Silver']);
-        }
-        sessionStorage.removeItem('synapta_sample');
-      } catch (e) {
-        console.error('Failed to parse sample data', e);
-      }
-    }
-  }, [setChallengeWords]);
+    // Generate new words for a new session
+    setChallengeWords(pickRandomWords(3));
+    setAudioBlob(null);
+    setTranscribedText('');
+    setStep('memorize');
+  }, [setChallengeWords, setAudioBlob]);
 
   const startSpeechRecognition = useCallback(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -136,12 +127,17 @@ export default function Home() {
     setIsTranscribing(false);
   }, []);
 
-  const handleStartRecording = useCallback(() => {
-    setError(null);
-    setTranscribedText('');
-    startTimeRef.current = Date.now();
-    startRecording();
-    startSpeechRecognition();
+  const handleStartRecording = useCallback(async () => {
+    try {
+      setError(null);
+      setTranscribedText('');
+      startTimeRef.current = Date.now();
+      await startRecording();
+      startSpeechRecognition();
+    } catch (err) {
+      console.error("Critical Recording Start Failure:", err);
+      setError("Failed to start recording. Please check microphone permissions.");
+    }
   }, [startRecording, startSpeechRecognition]);
 
   const handleStopRecording = useCallback(() => {
@@ -160,9 +156,9 @@ export default function Home() {
       handleStopRecording();
     }
 
-    console.log('--- CLIINICAL DEBUG: Waiting for audio blob to settle...');
+    // Wait for the MediaRecorder to finalize the blob
     let pollCount = 0;
-    while (!audioBlob && pollCount < 10 && mode === 'record') {
+    while (!audioBlob && pollCount < 15 && mode === 'record') {
        await new Promise(r => setTimeout(r, 100));
        pollCount++;
     }
@@ -170,37 +166,33 @@ export default function Home() {
     const userSpeechText = mode === 'record' ? transcribedText.trim() : textInput.trim();
 
     if (mode === 'record' && !audioBlob && !userSpeechText) {
-      setError('Recording failed or empty input. Please try again.');
+      setError('System could not capture memory response. Click recording button to retry.');
+      setIsAnalyzing(false);
       return;
     }
 
     setIsAnalyzing(true);
     setError(null);
 
-    const analysisTimeout = setTimeout(() => {
-      setIsAnalyzing(false);
-      setError('Analysis taking longer than expected. Please retry.');
+    const apiTimeout = setTimeout(() => {
+      if (isAnalyzing) {
+        setIsAnalyzing(false);
+        setError('Analysis stalled. System timeout reached.');
+      }
     }, 15000);
 
     try {
       let result: ApiAnalysisResult;
       if (mode === 'record' && audioBlob) {
-        try {
-          const file = new File([audioBlob], 'speech-input.webm', { type: audioBlob.type || 'audio/webm' });
-          result = await transcribeAudio({ audio: file, language: language as any, userId: activePatientId });
-          setTranscribedText(result.transcript);
-        } catch (transcribeError) {
-          if (!userSpeechText) throw transcribeError;
-          result = await analyzeText({ text: userSpeechText, language: language as any, userId: activePatientId });
-        }
+        const file = new File([audioBlob], 'speech-input.webm', { type: audioBlob.type || 'audio/webm' });
+        result = await transcribeAudio({ audio: file, language: language as any, userId: activePatientId });
       } else {
         result = await analyzeText({ text: userSpeechText || '', language: language as any, userId: activePatientId });
       }
 
+      // Professional simulated evaluation delay
       await new Promise(r => setTimeout(r, 1500));
       
-      // Calculate final results automatically
-      const displayResult = toDisplayResult(result);
       const finalSpeechText = result.transcript || userSpeechText;
       const { matched } = calculateMemoryScore(challengeWords, finalSpeechText);
       
@@ -214,7 +206,7 @@ export default function Home() {
       const fullResult = {
         patientId: activePatientId,
         timestamp: new Date().toISOString(),
-        apiScore: displayResult.score,
+        apiScore: result.riskScore,
         memoryScore: (matched.length / challengeWords.length) * 100,
         combinedScore,
         risk: (combinedScore < 50 ? 'High' : combinedScore < 75 ? 'Medium' : 'Low') as RiskLevel,
@@ -229,125 +221,102 @@ export default function Home() {
       saveAssessment(fullResult);
       setLatestResult(fullResult);
       setLocation('/results');
-      clearTimeout(analysisTimeout);
     } catch (err: any) {
-      console.error('--- CLIINICAL DEBUG: Analysis Error:', err);
-      setError('Analysis failed. Please check your mic connection and try again.');
+      setError('Assessment failed to process. Ensure stable internet connection.');
     } finally {
       setIsAnalyzing(false);
-      clearTimeout(analysisTimeout);
+      clearTimeout(apiTimeout);
     }
   }, [audioBlob, mode, transcribedText, textInput, language, isRecording, ensurePatientId, handleStopRecording, challengeWords, durationSeconds, setLatestResult, setLocation]);
 
+  // Master Timer - 10s Memorize Countdown
   useEffect(() => {
     if (step === 'memorize') {
       setCountdown(10);
-      countdownRef.current = setInterval(() => {
+      const timer = setInterval(() => {
         setCountdown(prev => {
           if (prev <= 1) {
-            if (countdownRef.current) clearInterval(countdownRef.current);
+            clearInterval(timer);
+            // Automatic advancement disabled per Task requirements for explicit click,
+            // but the UI reflects the end of study period.
             return 0;
           }
           return prev - 1;
         });
       }, 1000);
-      return () => {
-        if (countdownRef.current) clearInterval(countdownRef.current);
-      };
+      return () => clearInterval(timer);
     }
-    return undefined;
   }, [step]);
 
+  // Master Timer - 10s Record Countdown
   useEffect(() => {
     if (isRecording && mode === 'record') {
       setRecordingTimer(10);
-      recordingTimerRef.current = setInterval(() => {
+      const timer = setInterval(() => {
         setRecordingTimer(prev => {
           if (prev <= 1) {
-            if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+            clearInterval(timer);
             handleStopRecording();
+            // Critical Auto-Trigger for Analysis (Task 6)
             setTimeout(() => {
               handleAnalyze();
-            }, 500);
+            }, 600);
             return 0;
           }
           return prev - 1;
         });
       }, 1000);
-    } else {
-      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+      return () => clearInterval(timer);
     }
-    return () => {
-      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
-    };
   }, [isRecording, mode, handleStopRecording, handleAnalyze]);
 
-  const handleMemorized = () => {
-    if (countdownRef.current) clearInterval(countdownRef.current);
+  const handleMemorized = async () => {
     ensurePatientId();
     setStep('record');
+    // Task 2: Recording starts automatically after click
     setTimeout(() => {
-      handleStartRecording();
-    }, 500);
+       handleStartRecording();
+    }, 400);
   };
 
-  const translations = {
-    en: {
-      heroTitle: 'AI-Based Cognitive',
-      heroSubtitle: 'Clinical Screening Tool',
-      description: 'Instant, evidence-based cognitive screening using speech biomarkers and associative memory patterns. Designed for early detection and historical trend monitoring.',
-      patientPlaceholder: 'Patient ID (Auto-generated if empty)',
-      memoryTitle: 'Cognitive Memory Task',
-      memoryHelp: 'Please memorize these words. You will be asked to recall them shortly.',
-      memorizedBtn: 'Confirm Memorization',
-      audioBtn: 'Audio Input',
-      textBtn: 'Text Input',
-      tapStart: 'Start Clinical Recording',
-      tapStop: 'Stop and Analyze',
-      analyzeBtn: 'Process Analysis',
-      recallTitle: 'Memory Recall Verification',
-      recallHelp: 'Speech pattern analysis ready. Please recall the three markers provided at the start of the session.',
-      seeResults: 'Generate Report',
-      disclaimer: 'CLINICAL NOTICE: This system provides an AI-augmented screening, not a definitive diagnosis. It is intended for preliminary risk assessment and longitudinal tracking by healthcare professionals.',
-      medicalCard: 'Screening Protocol',
-      privacyNote: 'Secure Local Storage Active'
-    },
-    hi: {
-      heroTitle: 'एआई-आधारित स्वास्थ',
-      heroSubtitle: 'संज्ञानात्मक जांच प्रणाली',
-      description: 'भाषण बायोमार्कर और स्मृति पैटर्न का उपयोग करके तत्काल संज्ञानात्मक जांच। यह प्रणाली प्रारंभिक जोखिम मूल्यांकन और दीर्घकालिक निगरानी के लिए तैयार की गई है।',
-      patientPlaceholder: 'रोगी आईडी (स्वचालित रूप से उत्पन्न)',
-      memoryTitle: 'संज्ञानात्मक स्मृति कार्य',
-      memoryHelp: 'कृपया इन शब्दों को याद करें। आपसे जल्द ही इनके बारे में पूछा जाएगा।',
-      memorizedBtn: 'मैंने याद कर लिया',
-      audioBtn: 'ऑडियो इनपुट',
-      textBtn: 'टेक्स्ट इनपुट',
-      tapStart: 'जांच शुरू करें',
-      tapStop: 'विश्लेषण करें',
-      analyzeBtn: 'विश्लेषण प्रक्रिया शुरू करें',
-      recallTitle: 'स्मृति सत्यापन',
-      recallHelp: 'भाषाई विश्लेषण तैयार है। कृपया सत्र की शुरुआत में दिए गए तीन शब्दों को लिखें।',
-      seeResults: 'रिपोर्ट प्राप्त करें',
-      disclaimer: 'चिकित्सा सूचना: यह प्रणाली एआई-आधारित प्रारंभिक जांच (Screening) प्रदान करती है, यह अंतिम निदान नहीं है। यह केवल स्वास्थ्य पेशेवरों द्वारा उपयोग के लिए है।',
-      medicalCard: 'जांच प्रोटोकॉल',
-      privacyNote: 'सुरक्षित स्थानीय डेटा संग्रहण सक्रिय'
-    }
+  const t = language === 'hi' ? {
+    heroTitle: 'एआई-आधारित स्वास्थ',
+    heroSubtitle: 'संज्ञानात्मक जांच प्रणाली',
+    description: 'भाषण बायोमार्कर और स्मृति पैटर्न का उपयोग करके तत्काल संज्ञानात्मक जांच। यह प्रणाली प्रारंभिक जोखिम मूल्यांकन और निगरानी के लिए है।',
+    patientPlaceholder: 'रोगी आईडी दर्ज करें',
+    memoryTitle: 'स्मृति चुनौती',
+    memoryHelp: 'कृपया इन शब्दों को याद करें। ३... २... १...',
+    memorizedBtn: 'सत्यापन शुरू करें',
+    disclaimer: 'CLINICAL NOTICE: यह प्रणाली एआई-आधारित जांच प्रदान करती है, यह अंतिम निदान नहीं है।',
+    medicalCard: 'जांच प्रोटोकॉल',
+    privacyNote: 'सुरक्षित स्थानीय डेटा संग्रहण',
+    tapStart: 'जांच शुरू करें'
+  } : {
+    heroTitle: 'AI-Based Cognitive',
+    heroSubtitle: 'Clinical Screening Tool',
+    description: 'Instant, evidence-based cognitive screening using speech biomarkers and associative memory patterns. Designed for early detection.',
+    patientPlaceholder: 'Patient ID (Auto-generated)',
+    memoryTitle: 'Cognitive Memory Task',
+    memoryHelp: 'Please memorize these words. You will recite them in the next step.',
+    memorizedBtn: 'Confirm & Start Recording',
+    disclaimer: 'CLINICAL NOTICE: This system provides AI-augmented screening. Always consult a healthcare professional for diagnosis.',
+    medicalCard: 'Screening Protocol',
+    privacyNote: 'Secure Local Storage Active',
+    tapStart: 'Tap Start Recording'
   };
-
-  const t = language === 'hi' ? translations.hi : translations.en;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center py-4">
       <div className="space-y-6 animate-in slide-in-from-left duration-700">
         <div>
           <Badge variant="outline" className="mb-4 py-1 px-3 border-primary/30 text-primary bg-primary/5 flex items-center gap-2 w-fit">
-            <HeartPulse className="w-3.5 h-3.5" /> Clinical Proto-Type v1.4
+            <HeartPulse className="w-3.5 h-3.5" /> Clinical Proto-Type v1.5
           </Badge>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-extrabold leading-tight tracking-tight text-foreground">
+          <h1 className="text-4xl md:text-5xl lg:text-5xl font-display font-extrabold leading-tight tracking-tight text-foreground">
             {t.heroTitle} <br />
             <span className="text-primary">{t.heroSubtitle}</span>
           </h1>
-          <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-lg font-medium">
+          <p className="mt-6 text-base text-muted-foreground leading-relaxed max-w-lg font-medium">
             {t.description}
           </p>
         </div>
@@ -370,8 +339,8 @@ export default function Home() {
                    <Languages className="w-5 h-5 text-primary" />
                 </div>
                 <div className="flex-1 flex gap-2">
-                   <button onClick={() => setLanguage('en')} className={`text-xs font-bold px-3 py-1.5 rounded-md transition-colors ${language === 'en' ? 'bg-primary text-white' : 'hover:bg-secondary'}`}>English</button>
-                   <button onClick={() => setLanguage('hi')} className={`text-xs font-bold px-3 py-1.5 rounded-md transition-colors ${language === 'hi' ? 'bg-primary text-white' : 'hover:bg-secondary'}`}>हिंदी</button>
+                   <button onClick={() => setLanguage('en')} className={`text-[10px] font-black px-4 py-2 rounded-lg transition-colors ${language === 'en' ? 'bg-primary text-white' : 'bg-secondary'}`}>ENGLISH</button>
+                   <button onClick={() => setLanguage('hi')} className={`text-[10px] font-black px-4 py-2 rounded-lg transition-colors ${language === 'hi' ? 'bg-primary text-white' : 'bg-secondary'}`}>HINDI</button>
                 </div>
               </div>
            </div>
@@ -381,9 +350,9 @@ export default function Home() {
       <div className="relative">
         <div className="absolute -inset-10 bg-primary/5 blur-[120px] -z-10 rounded-full" />
         
-        <Card className="p-6 md:p-10 border-none shadow-2xl relative overflow-hidden bg-white/90 backdrop-blur-sm">
-           <div className="absolute bottom-0 right-0 p-6 opacity-[0.03] pointer-events-none translate-x-8 translate-y-8">
-              <Brain className="w-56 h-56" />
+        <Card className="p-6 md:p-10 border-none shadow-2xl relative overflow-hidden bg-white/90 backdrop-blur-sm min-h-[460px] flex flex-col items-center justify-center">
+           <div className="absolute top-0 right-0 p-6 opacity-[0.03] pointer-events-none">
+              <Brain className="w-48 h-48" />
            </div>
 
            <AnimatePresence mode="wait">
@@ -393,32 +362,37 @@ export default function Home() {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 1.05 }}
-                  className="flex flex-col items-center gap-6 min-h-[360px] justify-center"
+                  className="flex flex-col items-center gap-8 w-full"
                 >
                   <div className="text-center space-y-2">
-                     <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">{t.medicalCard}</h3>
-                     <h2 className="text-2xl font-display font-bold text-foreground">{t.memoryTitle}</h2>
+                     <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em]">{t.medicalCard}</h3>
+                     <h2 className="text-3xl font-display font-bold text-foreground tracking-tight">{t.memoryTitle}</h2>
                   </div>
 
-                  <p className="text-sm font-medium text-muted-foreground text-center max-w-sm -mt-4">
-                    {t.memoryHelp}
-                  </p>
-
-                   <div className="flex flex-wrap items-center justify-center gap-2 w-full overflow-hidden">
+                   <div className="grid grid-cols-1 gap-3 w-full max-w-[280px]">
                     {challengeWords.map((word, i) => (
-                      <div key={i} className="px-4 py-3 bg-secondary rounded-xl border-2 border-primary/10 shadow-sm whitespace-nowrap">
-                        <span className="text-xl md:text-3xl font-display font-black text-primary">{word}</span>
-                      </div>
+                      <motion.div 
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: i * 0.1 }}
+                        key={i} 
+                        className="px-6 py-4 bg-secondary rounded-2xl border border-primary/5 shadow-sm text-center"
+                      >
+                        <span className="text-2xl font-display font-black text-primary">{word}</span>
+                      </motion.div>
                     ))}
                   </div>
 
-                  <div className="flex flex-col items-center gap-4">
-                    <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
-                       <Clock className="w-4 h-4" /> AUTO-ADVANCE IN {countdown}S
-                    </div>
-                    <Button onClick={handleMemorized} size="lg" className="px-8 py-5 md:px-10 md:py-7 text-base md:text-lg font-bold shadow-lg hover:shadow-primary/20 transition-all">
-                      {t.memorizedBtn} <ArrowRight className="w-5 h-5 ml-2" />
+                  <div className="flex flex-col items-center gap-5">
+                    <p className="text-xs font-bold text-muted-foreground text-center max-w-[200px]">
+                      {t.memoryHelp}
+                    </p>
+                    <Button onClick={handleMemorized} size="lg" className="px-10 py-7 text-base font-black shadow-xl hover:shadow-primary/20 transition-all active:scale-95 group">
+                      {t.memorizedBtn} <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                     </Button>
+                    <div className="flex items-center gap-2 text-[10px] font-black text-muted-foreground/50 uppercase">
+                       <Clock className="w-3.5 h-3.5" /> Study Period: {countdown}s
+                    </div>
                   </div>
                 </motion.div>
               )}
@@ -426,66 +400,69 @@ export default function Home() {
               {step === 'record' && (
                 <motion.div 
                   key="record"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="flex flex-col items-center gap-4 min-h-[360px] justify-center"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex flex-col items-center gap-6 w-full"
                 >
                   {isAnalyzing ? (
-                    <div className="flex flex-col items-center gap-6 animate-pulse">
-                       <div className="w-20 h-20 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+                    <div className="flex flex-col items-center gap-8 animate-in fade-in zoom-in duration-500">
+                       <div className="relative w-24 h-24">
+                          <div className="absolute inset-0 border-4 border-primary/20 rounded-full" />
+                          <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                       </div>
                        <div className="text-center space-y-2">
-                          <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Diagnostic Neural Engine</h3>
-                          <p className="text-xl font-display font-bold text-foreground">Analyzing Biomarkers...</p>
+                          <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em]">Clinical AI</h3>
+                          <p className="text-xl font-display font-bold text-foreground">Processing Diagnostic Biomarkers...</p>
                        </div>
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center gap-6 w-full">
-                       <div className="flex flex-col items-center gap-2 text-center mb-2">
-                          <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Active Task</h3>
-                          <h4 className="text-xl font-display font-bold">Verbal Memory Recall</h4>
+                    <div className="flex flex-col items-center gap-8 w-full">
+                       <div className="flex flex-col items-center gap-2 text-center">
+                          <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em]">Active Task</h3>
+                          <h4 className="text-2xl font-display font-black">Verbal Recall</h4>
                           <p className="text-xs text-muted-foreground font-medium max-w-[240px]">
-                             Please recite the words you just memorized into the microphone.
+                             Please speak the memorized words clearly into the microphone.
                           </p>
                        </div>
 
-                       <div className="relative w-40 h-40 flex items-center justify-center">
+                       <div className="relative w-44 h-44 flex items-center justify-center">
                           {isRecording && (
                             <motion.div 
                               initial={{ scale: 0.8, opacity: 0 }}
-                              animate={{ scale: 1.2, opacity: 0.15 }}
-                              transition={{ repeat: Infinity, duration: 1.5, ease: "easeOut" }}
-                              className="absolute inset-0 bg-primary rounded-full"
+                              animate={{ scale: 1.3, opacity: 0.2 }}
+                              transition={{ repeat: Infinity, duration: 1, ease: "easeOut" }}
+                              className="absolute inset-0 bg-primary rounded-full shadow-[0_0_40px_rgba(var(--primary-rgb),0.4)]"
                             />
                           )}
                           
                           <button 
                             onClick={isRecording ? handleStopRecording : handleStartRecording}
-                            className={`z-10 w-32 h-32 rounded-full flex flex-col items-center justify-center transition-all duration-500 shadow-2xl relative ${isRecording ? 'bg-destructive text-white scale-110' : 'bg-primary text-white hover:bg-primary/90'}`}
+                            className={`z-10 w-36 h-36 rounded-full flex flex-col items-center justify-center transition-all duration-500 shadow-2xl relative ${isRecording ? 'bg-destructive text-white scale-105' : 'bg-primary text-white hover:bg-primary/90'}`}
                           >
                              {isRecording ? (
                                <div className="flex flex-col items-center">
-                                 <span className="text-4xl font-black font-display leading-none">{recordingTimer}s</span>
-                                 <span className="text-[9px] font-black uppercase tracking-widest mt-1">Remaining</span>
+                                 <span className="text-5xl font-black font-display leading-none">{recordingTimer}</span>
+                                 <span className="text-[8px] font-black uppercase tracking-[0.2em] mt-2">REC ACTIVE</span>
                                </div>
                              ) : (
                                <div className="flex flex-col items-center">
-                                 <Mic className="w-10 h-10 mb-1" />
-                                 <span className="text-[9px] font-black uppercase tracking-widest">Manual Start</span>
+                                 <Mic className="w-12 h-12 mb-1" />
+                                 <span className="text-[8px] font-black uppercase tracking-[0.2em]">Manual Trigger</span>
                                </div>
                              )}
                           </button>
                        </div>
 
-                       <div className="flex flex-col items-center gap-3">
+                       <div className="flex flex-col items-center gap-4">
                           <Waveform isActive={isRecording} />
-                          <p className={`text-[10px] font-black uppercase tracking-widest transition-colors ${isRecording ? 'text-destructive animate-pulse' : 'text-muted-foreground'}`}>
-                            {isRecording ? "STABILITY: MONITORING SPEECH" : "SYSTEM READY FOR INPUT"}
+                          <p className={`text-[10px] font-black uppercase tracking-[0.3em] transition-colors ${isRecording ? 'text-destructive animate-pulse' : 'text-muted-foreground'}`}>
+                            {isRecording ? "STABILITY: MONITORING DATA" : "SYSTEM SYNCHRONIZED"}
                           </p>
                        </div>
 
                        {error && (
-                         <div className="flex items-center gap-2 text-destructive font-black text-[10px] uppercase tracking-tighter bg-destructive/5 px-4 py-2 border border-destructive/10 rounded-full">
-                           <ShieldAlert className="w-3.5 h-3.5" /> {error}
+                         <div className="flex items-center gap-2 text-white font-black text-[10px] uppercase tracking-widest bg-destructive px-6 py-3 rounded-full shadow-lg">
+                           <ShieldAlert className="w-4 h-4" /> {error}
                          </div>
                        )}
                     </div>
@@ -496,15 +473,15 @@ export default function Home() {
         </Card>
 
         <div className="mt-8 space-y-4 animate-in fade-in duration-1000 delay-500">
-           <div className="bg-amber-50/50 backdrop-blur-sm border border-amber-100 rounded-2xl p-4 flex gap-3 shadow-sm">
-              <ShieldAlert className="w-5 h-5 text-amber-600/70 shrink-0 mt-0.5" />
-              <p className="text-[11px] leading-relaxed text-amber-900/80 font-medium">
+           <div className="bg-amber-50/70 backdrop-blur-sm border border-amber-200/50 rounded-2xl p-5 flex gap-4 shadow-sm">
+              <ShieldAlert className="w-5 h-5 text-amber-600/80 shrink-0 mt-0.5" />
+              <p className="text-[11px] leading-relaxed text-amber-900/90 font-medium">
                 {t.disclaimer}
               </p>
            </div>
            
-           <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-black uppercase tracking-widest px-1 opacity-60">
-              <ClipboardCheck className="w-3.5 h-3.5 text-primary" />
+           <div className="flex items-center gap-2 text-[9px] text-muted-foreground/40 font-black uppercase tracking-[0.2em] px-1">
+              <ClipboardCheck className="w-3 h-3 text-primary/50" />
               {t.privacyNote}
            </div>
         </div>
