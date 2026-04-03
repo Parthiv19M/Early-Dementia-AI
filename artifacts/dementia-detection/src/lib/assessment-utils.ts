@@ -10,14 +10,16 @@ export function getRiskDescription(risk: RiskLevel): string {
   return 'The screening did not detect strong warning signs, but regular monitoring is still a healthy habit.';
 }
 
-export function getScoreExplanation(score: number): string {
-  if (score >= 70) {
-    return 'A higher combined score suggests stronger speech fluency and short-term recall performance during this screening.';
+export function getScoreExplanation(score: number, recalledCount: number, totalWords: number, speechText: string): string {
+  const wordCount = speechText.trim().split(/\s+/).filter(Boolean).length;
+  
+  if (score > 75 && recalledCount === totalWords) {
+    return "User successfully recalled all words and provided structured, fluent responses.";
   }
-  if (score >= 40) {
-    return 'A mid-range combined score suggests some areas looked steady while others may benefit from closer observation over time.';
+  if (score >= 50) {
+    return "Partial recall observed with moderate speech clarity and structured engagement.";
   }
-  return 'A lower combined score suggests more noticeable difficulty in recall or speech structure during this screening session.';
+  return "Limited recall and minimal verbal response detected, suggesting potential cognitive fatigue or difficulty.";
 }
 
 export interface ScoreFactors {
@@ -32,24 +34,31 @@ export function calculateClinicalScore(
   totalWords: number,
   speechText: string,
   durationSeconds: number
-): { total: number; factors: ScoreFactors; confidence: number; explanation: string[] } {
+): { 
+  total: number; 
+  factors: ScoreFactors; 
+  confidence: number; 
+  explanation: string;
+  dynamicObservations: string[];
+} {
   // 1. Memory Score (40%)
   const memoryScore = (recalledCount / totalWords) * 100;
   
   // 2. Speech Quality (30%)
   const docWords = speechText.trim().split(/\s+/).filter(Boolean);
-  const speechQuality = Math.min(100, (docWords.length / 8) * 100); // 8+ words is good for 10s
+  const wordCount = docWords.length;
+  const speechQuality = Math.min(100, (wordCount / 12) * 100); // 12+ words is good
   
   // 3. Response Time (15%)
   // Ideal range: 4s to 8s
   let timeScore = 100;
-  if (durationSeconds < 4) timeScore = 60;
-  if (durationSeconds > 8) timeScore = 80;
-  if (durationSeconds < 2) timeScore = 30;
+  if (durationSeconds < 4) timeScore = 70;
+  if (durationSeconds > 10) timeScore = 60;
+  if (durationSeconds < 2) timeScore = 40;
   
   // 4. Consistency (15%)
   const uniqueWords = new Set(docWords.map(w => w.toLowerCase()));
-  const repetitionRatio = docWords.length > 0 ? uniqueWords.size / docWords.length : 1;
+  const repetitionRatio = wordCount > 0 ? uniqueWords.size / wordCount : 1;
   const consistency = repetitionRatio * 100;
 
   const total = Math.round(
@@ -59,66 +68,67 @@ export function calculateClinicalScore(
     (consistency * 0.15)
   );
 
-  // Confidence based on input completeness
+  // Confidence based on data quality (0-100 format)
   let confidence = 85;
-  if (docWords.length < 3) confidence -= 30;
-  if (docWords.length > 15) confidence += 5;
+  if (wordCount < 5) confidence -= 30;
+  if (wordCount > 15) confidence += 5;
   if (recalledCount === 0) confidence -= 10;
   confidence = Math.max(40, Math.min(98, confidence));
 
-  const explanation = [
-    `Memory recall: ${memoryScore >= 100 ? 'Excellent' : memoryScore >= 66 ? 'Good' : memoryScore >= 33 ? 'Partial' : 'Poor'} (${recalledCount}/${totalWords})`,
-    `Speech clarity: ${speechQuality >= 80 ? 'High' : speechQuality >= 50 ? 'Moderate' : 'Low'}`,
-    `Clinical confidence: ${confidence}%`
-  ];
+  // Dynamic Observations based on input
+  const dynamicObservations: string[] = [];
+  
+  // Speech Clarity
+  if (wordCount > 20) dynamicObservations.push("Speech Clarity: Good (Fluent length)");
+  else if (wordCount >= 10) dynamicObservations.push("Speech Clarity: Moderate (Substantial response)");
+  else dynamicObservations.push("Speech Clarity: Low (Limited verbal output)");
 
-  return { total, factors: { memoryRecall: memoryScore, speechQuality, responseTime: timeScore, consistency }, confidence, explanation };
+  // Sentence Structure
+  const hasPunctuation = /[.!?]/.test(speechText);
+  if (hasPunctuation && wordCount > 10) dynamicObservations.push("Sentence Structure: Good (Full narrative)");
+  else if (wordCount > 5) dynamicObservations.push("Sentence Structure: Moderate (Basic phrases)");
+  else dynamicObservations.push("Sentence Structure: Short (Fragmented or single words)");
+
+  const explanation = getScoreExplanation(total, recalledCount, totalWords, speechText);
+
+  return { 
+    total, 
+    factors: { memoryRecall: memoryScore, speechQuality, responseTime: timeScore, consistency }, 
+    confidence, 
+    explanation,
+    dynamicObservations 
+  };
 }
 
-export function getLifestyleRecommendations(risk: RiskLevel): string[] {
-  if (risk === 'High') {
+export function getLifestyleRecommendations(score: number): string[] {
+  if (score > 75) {
     return [
-      'Arrange a formal medical evaluation and bring these screening results to the visit.',
-      'Build a consistent daily routine with sleep, hydration, medication review, and family support.',
-      'Use memory aids like written prompts, alarms, and simplified task lists at home.',
+      'Maintain healthy cognitive habits through social engagement.',
+      'Continue regular mental exercises like reading and puzzles.',
+      'Protect brain health with consistent sleep and hydration.'
     ];
   }
 
-  if (risk === 'Medium') {
+  if (score >= 50) {
     return [
-      'Repeat short memory and word-recall activities a few times each week.',
-      'Prioritize sleep, regular walking, and meaningful social conversation every day.',
-      'Track changes across future screenings so trends are easier to spot.',
+      'Consider increasing frequency of daily memory exercises.',
+      'Engage in regular reading and active recall activities.',
+      'Monitor cognitive trends across future screening sessions.'
     ];
   }
 
   return [
-    'Keep the brain active with reading, conversation, games, and learning routines.',
-    'Protect long-term cognitive health with exercise, sleep, and a balanced diet.',
-    'Repeat screenings periodically to catch meaningful changes early.',
+    'Consult a healthcare professional for a formal evaluation.',
+    'Monitor cognitive changes regularly and track history.',
+    'Engage with family and friends in structured conversations.'
   ];
 }
-
-const INSIGHT_MAP: Record<string, string> = {
-  'Low vocabulary diversity': 'Your speech used a limited range of unique words, which is a common indicator sometimes seen in early cognitive changes.',
-  'Reduced vocabulary diversity': 'A slightly narrower range of vocabulary was detected during the speech sample.',
-  'High word repetition rate': 'Frequent word repetition was noticed, which can occasionally signal difficulties with word-finding or flow.',
-  'Moderate word repetition': 'Some instances of repeating words or phrases were detected in the analysis.',
-  'Very short, fragmented sentences': 'Speech consisted of very brief, disconnected phrases rather than complete narrative sentences.',
-  'Short sentence structure': 'The analysis noted shorter sentence lengths, which may indicate a reduction in expressive complexity.',
-  'Frequent speech pauses': 'Multiple pauses were detected, which are often associated with the natural search for specific words during conversation.',
-  'Excessive filler words': 'A higher frequency of filler words was used, which can happen when the mind is working harder to retrieve specific information.',
-  'Low speech coherence': 'The logical connection between ideas occasionally seemed disconnected or difficult to follow.',
-  'Reduced speech coherence': 'The flow between different thoughts and sentences was somewhat less consistent than expected.',
-};
 
 export function getInsightSummary(observations: string[]): string {
   if (observations.length === 0) {
     return 'The analysis suggests your speech flow and structure were largely within standard parameters for this session.';
   }
-
-  const firstMatch = observations.find(obs => INSIGHT_MAP[obs]);
-  return firstMatch ? INSIGHT_MAP[firstMatch] : observations[0];
+  return observations[0]; // Use the first dynamic observation as summary
 }
 
 export function formatRiskBadgeLabel(risk: RiskLevel): string {

@@ -11,7 +11,7 @@ import { Button, Card, Input, Waveform, Badge } from '@/components/ui';
 import { useAudioRecorder } from '@/hooks/use-audio-recorder';
 import { getLifestyleRecommendations, calculateClinicalScore } from '@/lib/assessment-utils';
 import { saveAssessment } from '@/lib/assessment-storage';
-import { useAppStore, pickRandomWords, calculateMemoryScore } from '@/lib/store';
+import { useAppStore, pickRandomWords, calculateMemoryScore, type RiskLevel } from '@/lib/store';
 import type { AnalyzeResult } from '@/lib/store';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -208,28 +208,45 @@ export default function Home() {
   const handleAnalyze = async () => {
     const activePatientId = ensurePatientId();
     
-    // Ensure we give enough time for the recorder state to settle
-    let effectiveAudioBlob = audioBlob;
-    if (!effectiveAudioBlob && isRecording) {
+    // Explicit Stop logic to synchronize state before analysis
+    if (isRecording) {
+      console.log('--- CLIINICAL DEBUG: Stop recording before analysis');
       handleStopRecording();
-      // Brief wait for Blob creation
-      await new Promise(r => setTimeout(r, 500));
+    }
+
+    // Blob settlement wait: ensure the MediaRecorder onstop event has processed the chunks
+    // This is the most common cause for "empty blob" or stalling errors
+    console.log('--- CLIINICAL DEBUG: Waiting for audio blob to settle...');
+    let pollCount = 0;
+    while (!audioBlob && pollCount < 10 && mode === 'record') {
+       await new Promise(r => setTimeout(r, 200));
+       pollCount++;
     }
 
     const userSpeechText = mode === 'record' ? transcribedText.trim() : textInput.trim();
+    console.log('--- CLIINICAL DEBUG: Input detected', { mode, hasBlob: !!audioBlob, textLen: userSpeechText.length });
 
     if (mode === 'record' && !audioBlob && !userSpeechText) {
-      setError('Please record audio or provide text for analysis.');
+      setError('Recording failed or empty input. Please try again.');
       return;
     }
 
     setIsAnalyzing(true);
     setError(null);
 
+    // Timeout safety net (Task 5)
+    const analysisTimeout = setTimeout(() => {
+      if (isAnalyzing) {
+        setIsAnalyzing(false);
+        setError('Analysis taking longer than expected. Please retry.');
+        console.error('--- CLIINICAL DEBUG: Analysis Timeout after 15s');
+      }
+    }, 15000);
+
     try {
       let result: ApiAnalysisResult;
+      console.log('--- CLIINICAL DEBUG: Sending API Request...');
 
-      // Prioritize the raw audio if available for better clinical results
       if (mode === 'record' && audioBlob) {
         try {
           const file = new File([audioBlob], 'speech-input.webm', { 
@@ -240,9 +257,10 @@ export default function Home() {
             language: language as any,
             userId: activePatientId,
           });
+          console.log('--- CLIINICAL DEBUG: Transcription successful');
           setTranscribedText(result.transcript);
         } catch (transcribeError) {
-          console.warn('Direct transcription failed, falling back to local transcript', transcribeError);
+          console.warn('--- CLIINICAL DEBUG: Direct transcription failed, falling back to local transcript', transcribeError);
           if (!userSpeechText) throw transcribeError;
           result = await analyzeText({ text: userSpeechText, language: language as any, userId: activePatientId });
         }
@@ -250,13 +268,18 @@ export default function Home() {
         result = await analyzeText({ text: userSpeechText || '', language: language as any, userId: activePatientId });
       }
 
+      console.log('--- CLIINICAL DEBUG: API Response received');
+      // Simulated 2s delay for professional processing feel (Task 9)
+      await new Promise(r => setTimeout(r, 2000));
       setApiResult(toDisplayResult(result));
       setStep('recall');
+      clearTimeout(analysisTimeout);
     } catch (err: any) {
-      console.error('Analysis failed:', err);
+      console.error('--- CLIINICAL DEBUG: Analysis Error:', err);
       setError('Analysis failed. Please check your mic connection and try again.');
     } finally {
       setIsAnalyzing(false);
+      clearTimeout(analysisTimeout);
     }
   };
 
@@ -267,7 +290,7 @@ export default function Home() {
     const { matched } = calculateMemoryScore(challengeWords, recallInput);
     
     // Use the new clinical heuristic scoring for Task 1
-    const { total: combinedScore, confidence, explanation } = calculateClinicalScore(
+    const { total: combinedScore, confidence, explanation, dynamicObservations } = calculateClinicalScore(
        matched.length,
        challengeWords.length,
        transcribedText || textInput, // speechText
@@ -280,13 +303,13 @@ export default function Home() {
       apiScore: apiResult.score,
       memoryScore: (matched.length / challengeWords.length) * 100,
       combinedScore,
-      risk: apiResult.risk,
-      observations: [...apiResult.observations, ...explanation],
+      risk: (combinedScore < 50 ? 'High' : combinedScore < 75 ? 'Medium' : 'Low') as RiskLevel,
+      observations: dynamicObservations,
       challengeWords,
       recalledWords: matched,
-      recommendations: apiResult.recommendations.length > 0 ? apiResult.recommendations : getLifestyleRecommendations(apiResult.risk),
+      recommendations: getLifestyleRecommendations(combinedScore),
       confidence,
-      transcript: apiResult.transcript,
+      transcript: explanation, // Store the explanation here as it's more human-readable
     };
 
     saveAssessment(fullResult);

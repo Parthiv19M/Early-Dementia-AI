@@ -205,7 +205,7 @@ export default function Results() {
 
   const riskColors = getRiskColor(latestResult.risk);
   const combinedScore = latestResult.combinedScore;
-  const scoreExplanation = getScoreExplanation(combinedScore);
+  const scoreExplanation = latestResult.transcript;
   const insightSummary = getInsightSummary(latestResult.observations);
 
   const history = getAssessmentsByPatientId(latestResult.patientId);
@@ -542,7 +542,7 @@ export default function Results() {
                 <div className="flex flex-col md:flex-row md:items-center gap-2 mb-3">
                   <p className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em]">{t.disclaimerTitle}</p>
                   <Badge variant="outline" className="w-fit mx-auto md:mx-0 text-[10px] font-bold py-0 h-5 bg-white/50 border-primary/20 text-primary">
-                    {t.confidenceScore} {Math.round(latestResult.confidence * 100)}%
+                    {t.confidenceScore} {Math.round(latestResult.confidence)}%
                   </Badge>
                 </div>
                 <p className="text-[13px] text-foreground/70 leading-relaxed font-semibold max-w-2xl">
