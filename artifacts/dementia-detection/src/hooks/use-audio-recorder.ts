@@ -9,14 +9,31 @@ export function useAudioRecorder() {
   const chunksRef = useRef<BlobPart[]>([]);
 
   const stopRecording = useCallback(() => {
-    // Immediate state update for UI responsiveness
     setIsRecording(false);
     
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
+      try {
+        mediaRecorderRef.current.stop();
+      } catch (e) {
+        console.error("Error stopping MediaRecorder:", e);
+      }
       mediaRecorderRef.current.stream.getTracks().forEach(t => t.stop());
     }
   }, []);
+
+  const getSupportedMimeType = () => {
+    const types = [
+      'audio/webm;codecs=opus',
+      'audio/webm',
+      'audio/ogg;codecs=opus',
+      'audio/mp4',
+      'audio/mpeg'
+    ];
+    for (const type of types) {
+      if (MediaRecorder.isTypeSupported(type)) return type;
+    }
+    return ''; // Fallback to browser default
+  };
 
   const startRecording = useCallback(async () => {
     try {
@@ -25,10 +42,11 @@ export function useAudioRecorder() {
       chunksRef.current = [];
       
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream, {
-        mimeType: 'audio/webm;codecs=opus'
-      });
       
+      const mimeType = getSupportedMimeType();
+      const options = mimeType ? { mimeType } : {};
+      
+      const recorder = new MediaRecorder(stream, options);
       mediaRecorderRef.current = recorder;
       
       recorder.ondataavailable = (e) => {
@@ -36,12 +54,12 @@ export function useAudioRecorder() {
       };
       
       recorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        const blob = new Blob(chunksRef.current, { type: recorder.mimeType });
         setAudioBlob(blob);
         chunksRef.current = [];
       };
       
-      recorder.start(100); // Small time slices for data available
+      recorder.start(100); 
       setIsRecording(true);
     } catch (err) {
       console.error("Error accessing microphone:", err);
@@ -50,7 +68,6 @@ export function useAudioRecorder() {
     }
   }, []);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
