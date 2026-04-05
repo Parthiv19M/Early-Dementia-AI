@@ -369,16 +369,16 @@ export default function Home() {
                      <h2 className="text-3xl font-display font-bold text-foreground tracking-tight">{t.memoryTitle}</h2>
                   </div>
 
-                   <div className="grid grid-cols-1 gap-3 w-full max-w-[280px]">
+                   <div className="flex flex-wrap items-center justify-center gap-3 w-full mb-4">
                     {challengeWords.map((word, i) => (
                       <motion.div 
-                        initial={{ x: -20, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: i * 0.1 }}
                         key={i} 
-                        className="px-6 py-4 bg-secondary rounded-2xl border border-primary/5 shadow-sm text-center"
+                        className="px-6 py-4 bg-secondary rounded-2xl border border-primary/5 shadow-sm min-w-[120px] text-center"
                       >
-                        <span className="text-2xl font-display font-black text-primary">{word}</span>
+                        <span className="text-xl md:text-2xl font-display font-black text-primary">{word}</span>
                       </motion.div>
                     ))}
                   </div>
