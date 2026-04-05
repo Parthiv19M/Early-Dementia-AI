@@ -277,12 +277,13 @@ export default function Results() {
                      variant="ghost"
                      size="sm"
                      onClick={handleCopyId}
-                     className="h-8 w-8 p-0 text-primary hover:bg-primary/10 rounded-full border border-primary/10"
+                     className="h-9 w-9 p-0 text-primary bg-primary/5 hover:bg-primary/20 rounded-xl border border-primary/20 shadow-sm transition-all active:scale-95"
+                     title="Copy Patient ID"
                     >
                      {copied ? (
-                       <CheckCircle2 className="w-4 h-4 text-success" />
+                       <Check className="w-4 h-4 text-success font-black" />
                      ) : (
-                       <ClipboardCheck className="w-4 h-4" />
+                       <Copy className="w-4 h-4 text-primary font-black" />
                      )}
                     </Button>
                  </div>
@@ -339,11 +340,10 @@ export default function Results() {
                   {getRiskIcon(latestResult.risk)}
                 </div>
                   <Badge 
-                    variant="default"
-                    className={`px-6 py-2.5 text-xs font-black uppercase tracking-[0.2em] transition-all shadow-md border-0 ${
-                      latestResult.risk === 'High' ? 'bg-destructive text-white' : 
-                      latestResult.risk === 'Medium' ? 'bg-[#f59e0b] text-white shadow-[#f59e0b]/20 hover:bg-[#d97706]' : 
-                      'bg-success text-white shadow-success/20'
+                    className={`px-8 py-3 text-xs font-black uppercase tracking-[0.25em] transition-all shadow-lg border-0 rounded-full transform hover:scale-105 ${
+                      latestResult.risk === 'High' ? 'bg-destructive text-white shadow-destructive/30' : 
+                      latestResult.risk === 'Medium' ? 'bg-[#D97706] text-white shadow-amber-500/30' : 
+                      'bg-success text-white shadow-success/30'
                     }`}
                   >
                     {latestResult.risk} {t.riskSuffix}
