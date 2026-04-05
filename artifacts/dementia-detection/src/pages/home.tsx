@@ -330,13 +330,14 @@ export default function Home() {
                           <button onClick={isRecording ? handleStopRecording : handleStartRecording} className={`z-10 w-36 h-36 rounded-full flex flex-col items-center justify-center transition-all duration-500 shadow-2xl relative ${isRecording ? 'bg-destructive text-white scale-105' : 'bg-primary text-white hover:bg-primary/90'}`}>
                              {isRecording ? (
                                <div className="flex flex-col items-center">
-                                 <span className="text-5xl font-black font-display leading-none">{recordingTimer}</span>
-                                 <span className="text-[8px] font-black uppercase tracking-[0.2em] mt-2">REC ACTIVE</span>
+                                 <Square className="w-10 h-10 mb-2 fill-current" />
+                                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">STOP & ANALYZE</span>
+                                 <span className="text-2xl font-display font-black mt-1">{recordingTimer}s</span>
                                </div>
                              ) : (
                                <div className="flex flex-col items-center">
                                  <Mic className="w-12 h-12 mb-1" />
-                                 <span className="text-[8px] font-black uppercase tracking-[0.2em]">Manual Trigger</span>
+                                 <span className="text-[8px] font-black uppercase tracking-[0.2em]">Start Screen</span>
                                </div>
                              )}
                           </button>
