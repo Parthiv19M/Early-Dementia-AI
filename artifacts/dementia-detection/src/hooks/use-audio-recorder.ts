@@ -8,6 +8,16 @@ export function useAudioRecorder() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
 
+  const stopRecording = useCallback(() => {
+    // Immediate state update for UI responsiveness
+    setIsRecording(false);
+    
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current.stream.getTracks().forEach(t => t.stop());
+    }
+  }, []);
+
   const startRecording = useCallback(async () => {
     try {
       setError(null);
@@ -15,35 +25,32 @@ export function useAudioRecorder() {
       chunksRef.current = [];
       
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorderRef.current = new MediaRecorder(stream);
+      const recorder = new MediaRecorder(stream, {
+        mimeType: 'audio/webm;codecs=opus'
+      });
       
-      mediaRecorderRef.current.ondataavailable = (e) => {
+      mediaRecorderRef.current = recorder;
+      
+      recorder.ondataavailable = (e) => {
         if (e.data.size > 0) chunksRef.current.push(e.data);
       };
       
-      mediaRecorderRef.current.onstop = () => {
-        const type = mediaRecorderRef.current?.mimeType || 'audio/webm';
-        const blob = new Blob(chunksRef.current, { type });
+      recorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
         setAudioBlob(blob);
         chunksRef.current = [];
       };
       
-      mediaRecorderRef.current.start(200); // 200ms chunks
+      recorder.start(100); // Small time slices for data available
       setIsRecording(true);
     } catch (err) {
       console.error("Error accessing microphone:", err);
-      setError("Microphone access denied or not available.");
+      setError("Microphone access required");
+      throw err;
     }
   }, []);
 
-  const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      mediaRecorderRef.current.stream.getTracks().forEach(t => t.stop());
-      setIsRecording(false);
-    }
-  }, [isRecording]);
-
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
