@@ -43,11 +43,50 @@ export default function Home() {
 
   // Initialize fresh session on mount
   useEffect(() => {
+    // Check for educational samples first (Task: Option 1)
+    const sample = sessionStorage.getItem('synapta_sample');
+    if (sample) {
+      const data = JSON.parse(sample);
+      sessionStorage.removeItem('synapta_sample');
+      
+      // Educational Sample path - Instant Analysis
+      setChallengeWords(["Drum", "Trumpet", "Silver"]);
+      const performSampleAnalysis = async () => {
+         setIsAnalyzing(true);
+         const activePatientId = ensurePatientId();
+         const { matched } = calculateMemoryScore(["Drum", "Trumpet", "Silver"], data.text);
+         const { total, confidence, explanation, dynamicObservations } = calculateClinicalScore(
+            matched.length, 3, data.text, 5
+         );
+         
+         const result = {
+           patientId: activePatientId,
+           timestamp: new Date().toISOString(),
+           apiScore: total,
+           memoryScore: (matched.length / 3) * 100,
+           combinedScore: total,
+           risk: (total < 50 ? 'High' : total < 75 ? 'Medium' : 'Low') as RiskLevel,
+           observations: [...dynamicObservations, "SYSTEM NOTICE: This was a simulated educational sample."],
+           challengeWords: ["Drum", "Trumpet", "Silver"],
+           recalledWords: matched,
+           recommendations: getLifestyleRecommendations(total),
+           confidence: 100,
+           transcript: explanation,
+         };
+         
+         saveAssessment(result);
+         setLatestResult(result);
+         setTimeout(() => setLocation('/results'), 800);
+      };
+      performSampleAnalysis();
+      return;
+    }
+
     setChallengeWords(pickRandomWords(3));
     setAudioBlob(null);
     setTranscribedText('');
     setStep('memorize');
-  }, [setChallengeWords, setAudioBlob]);
+  }, [setChallengeWords, setAudioBlob, setLatestResult, setLocation, ensurePatientId]);
 
   const startSpeechRecognition = useCallback(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -144,7 +183,6 @@ export default function Home() {
     };
   }, [isRecording, handleStopRecording]);
 
-  // Unified Fast-Path Analysis (Task: Resolve slow processing)
   useEffect(() => {
     if (!isRecording && step === 'record' && (audioBlob || transcribedText)) {
       handleInstantAnalysis();
@@ -158,7 +196,6 @@ export default function Home() {
     const activePatientId = ensurePatientId();
 
     try {
-      // 1. Heuristic Instant Extraction
       const finalRawText = transcribedText.trim();
       const { matched } = calculateMemoryScore(challengeWords, finalRawText);
       const duration = startTimeRef.current ? (Date.now() - startTimeRef.current) / 1000 : 10;
@@ -173,7 +210,7 @@ export default function Home() {
       const localResult = {
         patientId: activePatientId,
         timestamp: new Date().toISOString(),
-        apiScore: combinedScore, // Initial scoring is heuristic for speed
+        apiScore: combinedScore,
         memoryScore: (matched.length / challengeWords.length) * 100,
         combinedScore,
         risk: (combinedScore < 50 ? 'High' : combinedScore < 75 ? 'Medium' : 'Low') as RiskLevel,
@@ -185,12 +222,10 @@ export default function Home() {
         transcript: explanation,
       };
 
-      // 2. Immediate Handover to Results UI
       saveAssessment(localResult);
       setLatestResult(localResult);
       setLocation('/results');
 
-      // 3. Background Deep-Analysis (Silent sync)
       if (audioBlob) {
         const file = new File([audioBlob], 'speech-input.webm', { type: audioBlob.type || 'audio/webm' });
         transcribeAudio({ audio: file, language: language as any, userId: activePatientId })
@@ -218,9 +253,7 @@ export default function Home() {
     memoryTitle: 'स्मृति चुनौती',
     memoryHelp: 'कृपया इन शब्दों को याद करें।',
     memorizedBtn: 'सत्यापन शुरू करें',
-    disclaimer: 'चिकित्सा सूचना: यह प्रणाली एआई-आधारित जांच प्रदान करती है।',
     medicalCard: 'जांच प्रोटोकॉल',
-    privacyNote: 'सुरक्षित स्थानीय डेटा संग्रहण',
   } : {
     heroTitle: 'AI-Based Cognitive',
     heroSubtitle: 'Clinical Screening Tool',
@@ -229,9 +262,7 @@ export default function Home() {
     memoryTitle: 'Cognitive Memory Task',
     memoryHelp: 'Please memorize these words. You will recite them in the next step.',
     memorizedBtn: 'Confirm & Start Recording',
-    disclaimer: 'CLINICAL NOTICE: This system provides AI-augmented screening.',
     medicalCard: 'Screening Protocol',
-    privacyNote: 'Secure Local Storage Active',
   };
 
   return (
@@ -239,7 +270,7 @@ export default function Home() {
       <div className="space-y-6 animate-in slide-in-from-left duration-700">
         <div>
           <Badge variant="outline" className="mb-4 py-1 px-3 border-primary/30 text-primary bg-primary/5 flex items-center gap-2 w-fit">
-            <HeartPulse className="w-3.5 h-3.5" /> Clinical Proto-Type v2.1
+            <HeartPulse className="w-3.5 h-3.5" /> Clinical Proto-Type v2.2
           </Badge>
           <h1 className="text-4xl md:text-5xl lg:text-5xl font-display font-extrabold leading-tight tracking-tight text-foreground">
             {t.heroTitle} <br />
@@ -297,48 +328,16 @@ export default function Home() {
 
               {step === 'record' && (
                 <motion.div key="record" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center gap-6 w-full text-center">
-                  {isAnalyzing ? (
-                    <div className="flex flex-col items-center gap-8 animate-in fade-in zoom-in duration-500">
-                       <div className="relative w-24 h-24">
-                          <div className="absolute inset-0 border-4 border-primary/20 rounded-full" />
-                          <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-                       </div>
-                       <div className="space-y-2">
-                          <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em]">Clinical AI</h3>
-                          <p className="text-xl font-display font-bold">Generating Instant Report...</p>
-                       </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center gap-8 w-full">
-                       <div className="space-y-1">
-                          <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em]">Active Task</h3>
-                          <h4 className="text-2xl font-display font-black">Verbal Recall</h4>
-                       </div>
-                       <div className="relative w-44 h-44 flex items-center justify-center">
-                          {isRecording && <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1.3, opacity: 0.2 }} transition={{ repeat: Infinity, duration: 1, ease: "easeOut" }} className="absolute inset-0 bg-primary rounded-full shadow-[0_0_40px_rgba(var(--primary-rgb),0.4)]" />}
-                          <button onClick={isRecording ? handleStopRecording : handleStartRecording} className={`z-10 w-36 h-36 rounded-full flex flex-col items-center justify-center transition-all duration-500 shadow-2xl relative ${isRecording ? 'bg-destructive text-white scale-105' : 'bg-primary text-white'}`}>
-                             {isRecording ? (
-                               <div className="flex flex-col items-center">
-                                 <Square className="w-10 h-10 mb-2 fill-current" />
-                                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">STOP & ANALYZE</span>
-                                 <span className="text-2xl font-display font-black mt-1">{recordingTimer}s</span>
-                               </div>
-                             ) : <Mic className="w-12 h-12" />}
-                          </button>
-                       </div>
-                       <div className="flex flex-col items-center gap-4">
-                          <Waveform isActive={isRecording} />
-                          <p className={`text-[10px] font-black uppercase tracking-[0.3em] transition-colors ${isRecording ? 'text-destructive animate-pulse' : 'text-muted-foreground'}`}>
-                            {isRecording ? "STABILITY: MONITORING DATA" : "SYSTEM SYNCHRONIZED"}
-                          </p>
-                       </div>
-                       {(error || recorderError) && (
-                         <div className="flex items-center gap-2 text-white font-black text-[10px] uppercase tracking-widest bg-destructive px-6 py-3 rounded-full shadow-lg">
-                           <ShieldAlert className="w-4 h-4" /> {error || recorderError}
-                         </div>
-                       )}
-                    </div>
-                  )}
+                  <div className="flex flex-col items-center gap-8 animate-in fade-in zoom-in duration-500 w-full">
+                     <div className="relative w-24 h-24">
+                        <div className="absolute inset-0 border-4 border-primary/20 rounded-full" />
+                        <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                     </div>
+                     <div className="space-y-2">
+                        <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em]">Clinical AI</h3>
+                        <p className="text-xl font-display font-bold">Generating Instant Report...</p>
+                     </div>
+                  </div>
                 </motion.div>
               )}
            </AnimatePresence>
