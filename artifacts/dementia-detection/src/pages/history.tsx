@@ -146,9 +146,15 @@ export default function History() {
                   <div className="flex gap-3">
                     <Badge variant="outline" className="px-4 py-1 font-bold bg-secondary/50 border-primary/10">{records.length} {t.assessmentsLabel}</Badge>
                     {latestRecord && (
-                      <Badge className={`px-4 py-1 font-bold ${latestRecord.risk === 'High' ? 'bg-destructive/10 text-destructive border-destructive/20' : latestRecord.risk === 'Medium' ? 'bg-warning/10 text-warning border-warning/20' : 'bg-success/10 text-success border-success/20'}`}>
+                      <span 
+                        className="inline-flex items-center px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider"
+                        style={{
+                          backgroundColor: latestRecord.risk === 'High' ? '#ef4444' : latestRecord.risk === 'Medium' ? '#D97706' : '#22c55e',
+                          color: '#ffffff',
+                        }}
+                      >
                         LATEST: {latestRecord.risk} {t.riskSuffix}
-                      </Badge>
+                      </span>
                     )}
                   </div>
                 </div>
@@ -200,7 +206,7 @@ export default function History() {
                                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none">
                                     {format(new Date(record.timestamp), 'PPPP')}
                                  </p>
-                                 <h4 className="text-lg font-bold text-foreground">Score: {record.combinedScore}</h4>
+                                 <h4 className="text-lg font-bold text-foreground">Score: {Math.round(record.combinedScore)}</h4>
                               </div>
                               <Button 
                                 variant="ghost" 

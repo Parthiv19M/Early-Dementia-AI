@@ -150,7 +150,7 @@ export default function DoctorDashboard() {
             </div>
             <h3 className="font-semibold text-muted-foreground">{t.statsLatest}</h3>
           </div>
-          <p className="text-4xl font-display font-bold text-foreground">{latestRecord?.combinedScore ?? 0}</p>
+          <p className="text-4xl font-display font-bold text-foreground">{Math.round(latestRecord?.combinedScore ?? 0)}</p>
           <p className="text-sm text-muted-foreground mt-2">
             {latestRecord ? `${t.statsLatestHelp} ${latestRecord.risk}` : t.statsLatestEmpty}
           </p>
@@ -242,12 +242,18 @@ export default function DoctorDashboard() {
                     <div className="flex items-center gap-2 mb-2">
                       <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
                       <span className="font-bold text-sm text-foreground">{new Date(record.timestamp).toLocaleDateString()}</span>
-                      <Badge variant={record.risk === 'High' ? 'destructive' : record.risk === 'Medium' ? 'warning' : 'success'} className="px-3 py-0 scale-90">
+                      <span 
+                        className="inline-flex items-center px-3 py-0 rounded-full text-xs font-bold uppercase tracking-wider scale-90"
+                        style={{
+                          backgroundColor: record.risk === 'High' ? '#ef4444' : record.risk === 'Medium' ? '#D97706' : '#22c55e',
+                          color: '#ffffff',
+                        }}
+                      >
                         {record.risk}
-                      </Badge>
+                      </span>
                     </div>
                     <p className="text-[13px] text-muted-foreground font-medium">
-                      Score: <span className="text-foreground font-bold">{record.combinedScore}</span> • Speech {record.apiScore} • Memory {record.memoryScore}
+                      Score: <span className="text-foreground font-bold">{Math.round(record.combinedScore)}</span> • Speech {Math.round(record.apiScore)} • Memory {Math.round(record.memoryScore)}
                     </p>
                     <div className="mt-3 p-3 bg-secondary/50 rounded-xl text-[13px] text-foreground/80 leading-relaxed border border-border/40">
                       {record.observations[0] || t.noObservations}
