@@ -49,27 +49,32 @@ export default function Home() {
       const data = JSON.parse(sample);
       sessionStorage.removeItem('synapta_sample');
       
-      // Educational Sample path - Instant Analysis
-      setChallengeWords(["Drum", "Trumpet", "Silver"]);
+      const challengeWordsLocal = ["Drum", "Trumpet", "Silver"];
+      setChallengeWords(challengeWordsLocal);
+      
       const performSampleAnalysis = async () => {
          setIsAnalyzing(true);
          const activePatientId = ensurePatientId();
-         const { matched } = calculateMemoryScore(["Drum", "Trumpet", "Silver"], data.text);
-         const { total, confidence, explanation, dynamicObservations } = calculateClinicalScore(
-            matched.length, 3, data.text, 5
+         
+         const score = data.forcedScore;
+         const risk = data.forcedRisk;
+         const recalled = data.recalled || [];
+         
+         const { confidence, explanation, dynamicObservations } = calculateClinicalScore(
+            recalled.length, 3, data.text, 5
          );
          
          const result = {
            patientId: activePatientId,
            timestamp: new Date().toISOString(),
-           apiScore: total,
-           memoryScore: (matched.length / 3) * 100,
-           combinedScore: total,
-           risk: (total < 50 ? 'High' : total < 75 ? 'Medium' : 'Low') as RiskLevel,
+           apiScore: score,
+           memoryScore: (recalled.length / 3) * 100,
+           combinedScore: score,
+           risk: risk as RiskLevel,
            observations: [...dynamicObservations, "SYSTEM NOTICE: This was a simulated educational sample."],
-           challengeWords: ["Drum", "Trumpet", "Silver"],
-           recalledWords: matched,
-           recommendations: getLifestyleRecommendations(total),
+           challengeWords: challengeWordsLocal,
+           recalledWords: recalled,
+           recommendations: getLifestyleRecommendations(score),
            confidence: 100,
            transcript: explanation,
          };

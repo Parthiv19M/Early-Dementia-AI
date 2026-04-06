@@ -24,9 +24,24 @@ export default function Learn() {
 
   const handleTrySample = (type: 'healthy' | 'early' | 'moderate') => {
     const samples = {
-      healthy: { text: "I went to the market today and bought some fresh apples. The weather was very pleasant.", recalled: "Drum, Trumpet, Silver" },
-      early: { text: "I... I had it just now… where did I keep it? It was right here on the table.", recalled: "Drum" },
-      moderate: { text: "Is today Monday? I’m not sure… I wanted to find my... the thing you use for writing.", recalled: "" }
+      healthy: { 
+        text: "I went to the market today and bought some fresh apples. The healthy weather was very pleasant. Drum, Trumpet, Silver.", 
+        recalled: ["Drum", "Trumpet", "Silver"],
+        forcedScore: 92,
+        forcedRisk: 'Low' as const
+      },
+      early: { 
+        text: "I... I had it just now… where did I keep it? Drum... wait, what was the other one?", 
+        recalled: ["Drum"],
+        forcedScore: 62,
+        forcedRisk: 'Medium' as const
+      },
+      moderate: { 
+        text: "Is today Monday? I’m not sure… I wanted to find my... the thing you use for writing.", 
+        recalled: [],
+        forcedScore: 32,
+        forcedRisk: 'High' as const
+      }
     };
     
     sessionStorage.setItem('synapta_sample', JSON.stringify(samples[type]));
