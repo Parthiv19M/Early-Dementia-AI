@@ -346,9 +346,9 @@ export default function Results() {
                 </div>
                   <Badge 
                     className={`px-8 py-3 text-xs font-black uppercase tracking-[0.25em] transition-all shadow-lg border-0 rounded-full transform hover:scale-105 ${
-                      latestResult.risk === 'High' ? 'bg-destructive text-white shadow-destructive/30' : 
+                      latestResult.risk === 'High' ? 'bg-[#ef4444] text-white shadow-red-500/30' : 
                       latestResult.risk === 'Medium' ? 'bg-[#D97706] text-white shadow-amber-500/30' : 
-                      'bg-success text-white shadow-success/30'
+                      'bg-[#22c55e] text-white shadow-green-500/30'
                     }`}
                   >
                     {latestResult.risk} {t.riskSuffix}
@@ -550,7 +550,7 @@ export default function Results() {
               <div className="text-center md:text-left">
                 <div className="flex flex-col md:flex-row md:items-center gap-2 mb-3">
                   <p className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em]">{t.disclaimerTitle}</p>
-                  <Badge variant="outline" className="w-fit mx-auto md:mx-0 text-[10px] font-bold py-0 h-5 bg-white/50 border-primary/20 text-primary">
+                  <Badge className="w-fit mx-auto md:mx-0 text-[10px] font-black px-3 py-0.5 h-6 bg-primary text-white shadow-sm border-none">
                     {t.confidenceScore} {Math.round(latestResult.confidence)}%
                   </Badge>
                 </div>
