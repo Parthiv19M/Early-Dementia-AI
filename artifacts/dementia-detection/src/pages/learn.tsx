@@ -28,19 +28,55 @@ export default function Learn() {
         text: "I went to the market today and bought some fresh apples. The healthy weather was very pleasant. Drum, Trumpet, Silver.", 
         recalled: ["Drum", "Trumpet", "Silver"],
         forcedScore: 92,
-        forcedRisk: 'Low' as const
+        forcedRisk: 'Low' as const,
+        forcedConfidence: 95,
+        forcedExplanation: "User successfully recalled all words and provided structured, fluent responses with no hesitation or confusion markers detected.",
+        forcedObservations: [
+          "Speech flow is natural and well-structured with coherent sentence formation.",
+          "Perfect memory recall: All 3 challenge words were accurately retrieved.",
+          "No signs of word-finding difficulty, repetition, or cognitive hesitation."
+        ],
+        forcedRecommendations: [
+          "Maintain healthy cognitive habits through social engagement.",
+          "Continue regular mental exercises like reading and puzzles.",
+          "Protect brain health with consistent sleep and hydration."
+        ]
       },
       early: { 
         text: "I... I had it just now… where did I keep it? Drum... wait, what was the other one?", 
         recalled: ["Drum"],
         forcedScore: 62,
-        forcedRisk: 'Medium' as const
+        forcedRisk: 'Medium' as const,
+        forcedConfidence: 78,
+        forcedExplanation: "User displayed notable hesitation patterns and partial recall. Only 1 of 3 words was retrieved, suggesting early signs of retrieval difficulty.",
+        forcedObservations: [
+          "Speech contains frequent pauses and self-corrections ('I had it just now…').",
+          "Partial memory recall: Only 1 of 3 challenge words was retrieved.",
+          "Word-finding difficulty detected: User expressed inability to recall remaining words."
+        ],
+        forcedRecommendations: [
+          "Schedule a follow-up cognitive screening in 3–6 months.",
+          "Incorporate daily memory exercises such as word association games.",
+          "Discuss observations with a healthcare provider for baseline documentation."
+        ]
       },
       moderate: { 
         text: "Is today Monday? I’m not sure… I wanted to find my... the thing you use for writing.", 
         recalled: [],
         forcedScore: 32,
-        forcedRisk: 'High' as const
+        forcedRisk: 'High' as const,
+        forcedConfidence: 62,
+        forcedExplanation: "User exhibited significant disorientation and complete failure to recall challenge words. Circumlocution ('the thing you use for writing') indicates notable word-finding impairment.",
+        forcedObservations: [
+          "Temporal disorientation detected: User unsure of the current day.",
+          "Complete memory failure: 0 of 3 challenge words were recalled.",
+          "Circumlocution present: Describing objects instead of naming them ('the thing you use for writing')."
+        ],
+        forcedRecommendations: [
+          "Consult a healthcare professional for a formal cognitive evaluation.",
+          "Monitor cognitive changes regularly and track history.",
+          "Engage with family and friends in structured conversations."
+        ]
       }
     };
     

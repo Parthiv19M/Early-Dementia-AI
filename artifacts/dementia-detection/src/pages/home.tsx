@@ -60,10 +60,6 @@ export default function Home() {
          const risk = data.forcedRisk;
          const recalled = data.recalled || [];
          
-         const { confidence, explanation, dynamicObservations } = calculateClinicalScore(
-            recalled.length, 3, data.text, 5
-         );
-         
          const result = {
            patientId: activePatientId,
            timestamp: new Date().toISOString(),
@@ -71,12 +67,12 @@ export default function Home() {
            memoryScore: (recalled.length / 3) * 100,
            combinedScore: score,
            risk: risk as RiskLevel,
-           observations: [...dynamicObservations, "SYSTEM NOTICE: This was a simulated educational sample."],
+           observations: data.forcedObservations || ["No specific observations reported."],
            challengeWords: challengeWordsLocal,
            recalledWords: recalled,
-           recommendations: getLifestyleRecommendations(score),
-           confidence: 100,
-           transcript: explanation,
+           recommendations: data.forcedRecommendations || getLifestyleRecommendations(score),
+           confidence: data.forcedConfidence || 85,
+           transcript: data.forcedExplanation || "Educational sample analysis completed.",
          };
          
          saveAssessment(result);
