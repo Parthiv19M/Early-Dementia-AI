@@ -71,12 +71,7 @@ export default function Learn() {
           </div>
           
           <div className="relative z-10 space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Info className="w-6 h-6 text-primary" />
-              </div>
-              <h2 className="text-3xl font-display font-bold text-foreground tracking-tight">What is Dementia?</h2>
-            </div>
+            <h2 className="text-3xl font-display font-bold text-foreground tracking-tight">What is Dementia?</h2>
             
             <div className="text-lg text-muted-foreground leading-relaxed space-y-4">
               <p>
