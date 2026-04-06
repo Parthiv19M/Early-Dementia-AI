@@ -277,13 +277,13 @@ export default function Results() {
                      variant="ghost"
                      size="sm"
                      onClick={handleCopyId}
-                     className="h-9 w-9 p-0 text-primary bg-primary/5 hover:bg-primary/20 rounded-xl border border-primary/20 shadow-sm transition-all active:scale-95"
+                     className="h-10 w-10 p-0 text-primary bg-primary/10 hover:bg-primary/20 rounded-xl border-2 border-primary/20 shadow-sm transition-all active:scale-95"
                      title="Copy Patient ID"
                     >
                      {copied ? (
-                       <Check className="w-4 h-4 text-success font-black" />
+                       <CheckCircle2 strokeWidth={2.5} className="w-5 h-5 text-success" />
                      ) : (
-                       <Copy className="w-4 h-4 text-primary font-black" />
+                       <Copy strokeWidth={2.5} className="w-5 h-5" />
                      )}
                     </Button>
                  </div>
