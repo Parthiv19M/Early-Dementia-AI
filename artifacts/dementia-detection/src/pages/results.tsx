@@ -274,16 +274,21 @@ export default function Results() {
                      {t.patientId}: {latestResult.patientId}
                     </Badge>
                     <Button
-                     variant="ghost"
-                     size="sm"
                      onClick={handleCopyId}
-                     className="h-10 w-10 p-0 text-primary bg-primary/10 hover:bg-primary/20 rounded-xl border-2 border-primary/20 shadow-sm transition-all active:scale-95"
-                     title="Copy Patient ID"
+                     size="sm"
+                     variant="secondary"
+                     className="h-9 px-4 flex items-center gap-2 rounded-xl transition-all active:scale-95 border-primary/20 hover:border-primary/40 shadow-sm"
                     >
                      {copied ? (
-                       <CheckCircle2 strokeWidth={2.5} className="w-5 h-5 text-success" />
+                       <>
+                         <CheckCircle2 className="w-4 h-4 text-success" />
+                         <span className="text-[10px] font-black uppercase text-success tracking-widest">COPIED</span>
+                       </>
                      ) : (
-                       <Copy strokeWidth={2.5} className="w-5 h-5" />
+                       <>
+                         <ClipboardCheck className="w-4 h-4 text-primary" />
+                         <span className="text-[10px] font-black uppercase text-primary tracking-widest">COPY ID</span>
+                       </>
                      )}
                     </Button>
                  </div>
