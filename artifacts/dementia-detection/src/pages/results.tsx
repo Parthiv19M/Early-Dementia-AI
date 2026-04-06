@@ -471,7 +471,9 @@ export default function Results() {
             </h3>
             <div className="flex flex-wrap gap-3">
               {latestResult.challengeWords.map((word, idx) => {
-                const wasRecalled = latestResult.recalledWords.includes(word.toLowerCase());
+                const wasRecalled = latestResult.recalledWords.some(
+                  rw => rw.toLowerCase() === word.toLowerCase()
+                );
                 return (
                   <motion.div
                     key={idx}
