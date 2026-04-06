@@ -344,15 +344,16 @@ export default function Results() {
                 <div className={`w-12 h-12 rounded-2xl ${riskColors.bg} ${riskColors.text} flex items-center justify-center`}>
                   {getRiskIcon(latestResult.risk)}
                 </div>
-                  <Badge 
-                    className={`px-8 py-3 text-xs font-black uppercase tracking-[0.25em] transition-all shadow-lg border-0 rounded-full transform hover:scale-105 ${
-                      latestResult.risk === 'High' ? 'bg-[#ef4444] text-white shadow-red-500/30' : 
-                      latestResult.risk === 'Medium' ? 'bg-[#D97706] text-white shadow-amber-500/30' : 
-                      'bg-[#22c55e] text-white shadow-green-500/30'
-                    }`}
+                  <span 
+                    className="inline-flex items-center px-8 py-3 text-xs font-black uppercase tracking-[0.25em] transition-all shadow-lg rounded-full transform hover:scale-105"
+                    style={{
+                      backgroundColor: latestResult.risk === 'High' ? '#ef4444' : latestResult.risk === 'Medium' ? '#D97706' : '#22c55e',
+                      color: '#ffffff',
+                      border: 'none',
+                    }}
                   >
                     {latestResult.risk} {t.riskSuffix}
-                  </Badge>
+                  </span>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
                 {getRiskDescription(latestResult.risk)}
@@ -550,9 +551,12 @@ export default function Results() {
               <div className="text-center md:text-left">
                 <div className="flex flex-col md:flex-row md:items-center gap-2 mb-3">
                   <p className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em]">{t.disclaimerTitle}</p>
-                  <Badge className="w-fit mx-auto md:mx-0 text-[10px] font-black px-3 py-0.5 h-6 bg-primary text-white shadow-sm border-none">
+                  <span 
+                    className="inline-flex items-center w-fit mx-auto md:mx-0 text-[10px] font-black px-3 py-0.5 h-6 rounded-full shadow-sm"
+                    style={{ backgroundColor: '#4f46e5', color: '#ffffff', border: 'none' }}
+                  >
                     {t.confidenceScore} {Math.round(latestResult.confidence)}%
-                  </Badge>
+                  </span>
                 </div>
                 <p className="text-[13px] text-foreground/70 leading-relaxed font-semibold max-w-2xl">
                   {t.disclaimerText}
