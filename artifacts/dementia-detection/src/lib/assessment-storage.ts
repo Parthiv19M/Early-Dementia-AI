@@ -67,3 +67,9 @@ export function deleteAssessment(recordId: string) {
   const filtered = getStoredAssessments().filter((record) => record.id !== recordId);
   writeStoredAssessments(filtered);
 }
+
+export function clearAllAssessments() {
+  if (!canUseStorage()) return;
+  window.localStorage.removeItem(STORAGE_KEY);
+  window.sessionStorage.clear();
+}

@@ -161,6 +161,7 @@ export default function Home() {
       }, 1000);
       return () => clearInterval(timer);
     }
+    return undefined;
   }, [step]);
 
   // Master Timer - 10s Record Countdown

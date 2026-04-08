@@ -4,7 +4,7 @@ import { Search, Trash2, TrendingUp, Calendar, AlertCircle, FileClock, Clipboard
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { useAppStore } from '@/lib/store';
 import { Card, Input, Button, Badge } from '@/components/ui';
-import { deleteAssessment, getAssessmentsByPatientId, type AssessmentRecord } from '@/lib/assessment-storage';
+import { deleteAssessment, getAssessmentsByPatientId, clearAllAssessments, type AssessmentRecord } from '@/lib/assessment-storage';
 
 export default function History() {
   const { userId, setUserId, language } = useAppStore();
@@ -156,6 +156,19 @@ export default function History() {
                         LATEST: {latestRecord.risk} {t.riskSuffix}
                       </span>
                     )}
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="px-4 py-1 font-bold text-muted-foreground hover:text-destructive hover:bg-destructive/10 border border-muted-foreground/10"
+                      onClick={() => {
+                        if (confirm('DANGER: This will permanently delete ALL clinical history and reset the app. Continue?')) {
+                          clearAllAssessments();
+                          window.location.reload();
+                        }
+                      }}
+                    >
+                      <Trash2 className="w-3.5 h-3.5 mr-1.5" /> Clear All History
+                    </Button>
                   </div>
                 </div>
 
