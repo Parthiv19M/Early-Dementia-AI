@@ -330,16 +330,48 @@ export default function Home() {
 
               {step === 'record' && (
                 <motion.div key="record" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center gap-6 w-full text-center">
-                  <div className="flex flex-col items-center gap-8 animate-in fade-in zoom-in duration-500 w-full">
-                     <div className="relative w-24 h-24">
-                        <div className="absolute inset-0 border-4 border-primary/20 rounded-full" />
-                        <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-                     </div>
-                     <div className="space-y-2">
-                        <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em]">Clinical AI</h3>
-                        <p className="text-xl font-display font-bold">Generating Instant Report...</p>
-                     </div>
-                  </div>
+                  {isAnalyzing ? (
+                    <div className="flex flex-col items-center gap-8 animate-in fade-in zoom-in duration-500">
+                       <div className="relative w-24 h-24">
+                          <div className="absolute inset-0 border-4 border-primary/20 rounded-full" />
+                          <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                       </div>
+                       <div className="space-y-2">
+                          <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em]">Clinical AI</h3>
+                          <p className="text-xl font-display font-bold">Generating Instant Report...</p>
+                       </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-8 w-full">
+                       <div className="space-y-1">
+                          <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.25em]">Active Task</h3>
+                          <h4 className="text-2xl font-display font-black">Verbal Recall</h4>
+                       </div>
+                       <div className="relative w-44 h-44 flex items-center justify-center">
+                          {isRecording && <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1.3, opacity: 0.2 }} transition={{ repeat: Infinity, duration: 1, ease: "easeOut" }} className="absolute inset-0 bg-primary rounded-full shadow-[0_0_40px_rgba(var(--primary-rgb),0.4)]" />}
+                          <button onClick={isRecording ? handleStopRecording : handleStartRecording} className={`z-10 w-36 h-36 rounded-full flex flex-col items-center justify-center transition-all duration-500 shadow-2xl relative ${isRecording ? 'bg-destructive text-white scale-105' : 'bg-primary text-white'}`}>
+                             {isRecording ? (
+                               <div className="flex flex-col items-center">
+                                 <Square className="w-10 h-10 mb-2 fill-current" />
+                                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">STOP & ANALYZE</span>
+                                 <span className="text-2xl font-display font-black mt-1">{recordingTimer}s</span>
+                               </div>
+                             ) : <Mic className="w-12 h-12" />}
+                          </button>
+                       </div>
+                       <div className="flex flex-col items-center gap-4">
+                          <Waveform isActive={isRecording} />
+                          <p className={`text-[10px] font-black uppercase tracking-[0.3em] transition-colors ${isRecording ? 'text-destructive animate-pulse' : 'text-muted-foreground'}`}>
+                            {isRecording ? "RECORDING IN PROGRESS" : "TAP MIC TO BEGIN"}
+                          </p>
+                       </div>
+                       {(error || recorderError) && (
+                         <div className="flex items-center gap-2 text-white font-black text-[10px] uppercase tracking-widest bg-destructive px-6 py-3 rounded-full shadow-lg">
+                           <ShieldAlert className="w-4 h-4" /> {error || recorderError}
+                         </div>
+                       )}
+                    </div>
+                  )}
                 </motion.div>
               )}
            </AnimatePresence>
