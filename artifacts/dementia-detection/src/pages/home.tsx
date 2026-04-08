@@ -87,7 +87,8 @@ export default function Home() {
     setAudioBlob(null);
     setTranscribedText('');
     setStep('memorize');
-  }, [setChallengeWords, setAudioBlob, setLatestResult, setLocation, ensurePatientId]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const startSpeechRecognition = useCallback(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
