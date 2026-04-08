@@ -244,7 +244,7 @@ export default function Home() {
     setStep('record');
     setTimeout(() => {
       handleStartRecording();
-    }, 150);
+    }, 500);
   };
 
   const t = language === 'hi' ? {
@@ -318,7 +318,7 @@ export default function Home() {
                   </div>
                   <div className="flex flex-col items-center gap-5">
                     <p className="text-xs font-bold text-muted-foreground max-w-[200px]">{t.memoryHelp}</p>
-                    <Button onClick={handleMemorized} size="lg" className="px-10 py-7 text-base font-black shadow-xl hover:shadow-primary/20 transition-all active:scale-95 group">
+                    <Button onClick={handleMemorized} size="lg" disabled={isAnalyzing || step !== 'memorize'} className="px-10 py-7 text-base font-black shadow-xl hover:shadow-primary/20 transition-all active:scale-95 group">
                       {t.memorizedBtn} <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                     </Button>
                     <div className="flex items-center gap-2 text-[10px] font-black text-muted-foreground/50 uppercase">
